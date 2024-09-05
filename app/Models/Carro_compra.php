@@ -15,8 +15,12 @@ class Carro_compra extends Model
         return $this->belongsTo(Cliente::class);
     }
 
-    public function detalleCompras()
+    public function detalle_compra()
     {
         return $this->hasMany(Detalle_compra::class);
+    }
+    public function pedido()
+    {
+        return $this->hasOne(Pedido::class);
     }
 }
