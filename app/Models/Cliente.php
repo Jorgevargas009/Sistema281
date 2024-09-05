@@ -20,8 +20,12 @@ class Cliente extends Model
         return $this->belongsTo(Comunidade::class);
     }
 
-    public function carrosCompras()
+    public function carrosCompra()
     {
         return $this->hasMany(Carro_compra::class);
+    }
+    public function soporte()
+    {
+        return $this->hasMany(Soporte::class);
     }
 }

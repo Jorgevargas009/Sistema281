@@ -19,5 +19,9 @@ class Comunidade extends Model
     {
         return $this->hasMany(Cliente::class);
     }
+    public function repartidore()
+    {
+        return $this->hasMany(Repartidore::class);
+    }
 }
  

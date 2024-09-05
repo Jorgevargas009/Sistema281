@@ -19,8 +19,14 @@ class Carro_compra extends Model
     {
         return $this->hasMany(Detalle_compra::class);
     }
+    public function pago()
+    {
+        return $this->hasOne(Pago::class);
+    }
+
     public function pedido()
     {
-        return $this->hasOne(Pedido::class);
+        return $this->belongsTo(pedido::class);
     }
+
 }

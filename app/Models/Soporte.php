@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Soporte extends Model
 {
     use HasFactory;
+    
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class);
+    }
 }

@@ -19,4 +19,9 @@ class Repartidore extends Model
     {
         return $this->belongsTo(Comunidade::class);
     }
+
+    public function pedido()
+    {
+        return $this->hasMany(pedido::class);
+    }
 }

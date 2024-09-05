@@ -15,12 +15,16 @@ class Producto extends Model
         return $this->belongsTo(Artesano::class);
     }
 
-    public function reseñas()
+    public function reseña()
     {
         return $this->hasMany(Reseña::class);
     }
-    public function promocion()
+    public function promocione()
     {
         return $this->hasOne(Promocione::class);
+    }
+    public function detalle_compra()
+    {
+        return $this->hasMany(Detalle_Compra::class);
     }
 }

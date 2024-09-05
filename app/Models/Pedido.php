@@ -11,9 +11,9 @@ class Pedido extends Model
 
     protected $fillable = ['carro_compra_id', 'repartidor_id', 'direccion_id', 'fecha_pedido', 'fecha_entrega', 'estado_entrega', 'total'];
 
-    public function carroCompra()
+    public function carro_compra()
     {
-        return $this->belongsTo(Carro_compra::class);
+        return $this->hasOne(Carro_compra::class);
     }
 
     public function repartidor()
