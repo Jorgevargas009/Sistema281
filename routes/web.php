@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProductoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,8 +15,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('template');
+    return view('template'); 
 });
+
+Route::view('/panel','panel.index')->name('panel');
+
+Route::resources([
+    'productos'=> ProductoController::class,
+]);
+
+Route::view('/categorias','categoria.index');
 
 Route::get('/login', function () {
     return view('auth.login');
