@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductoRequest;
+use App\Http\Requests\UpdateProductoRequest;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductoController extends Controller
 {
@@ -14,7 +16,10 @@ class ProductoController extends Controller
      */
     public function index()
     {
-        return view('producto.index');
+        /*$productos=Producto::with(['id artesano'])->latest()->get();*/
+        $productos = Producto::all();
+        return view('producto.index',compact('productos'));
+
     }
 
     /**
@@ -32,7 +37,22 @@ class ProductoController extends Controller
     {
         try{
             DB::beginTransaction();
-            $producto = Producto::create($request->validated());
+            $producto = new Producto();
+            if($request->hasFile('imagen_path'))
+            {
+                    $name = $producto->hanbleUploadImage($request->file('imagen_path'));
+            }else{
+                $name=null;
+            }
+            $producto->fill([
+                'nombre'=> $request->nombre,
+                'descripcion'=> $request->descripcion,
+                'imagen_path'=> $name,
+                'precio'=> $request->precio,
+                'stock'=> $request->stock,
+            ]);
+
+            $producto->save();
             DB::commit();
 
         }
@@ -40,7 +60,8 @@ class ProductoController extends Controller
             DB::rollBack();
             return back()->with('error', $e->getMessage()); 
         }
-        return redirect()->route('productos.index');
+        
+        return redirect()->route('productos.index')->with('success','Producto Registrado');
     }
 
     /**
@@ -54,24 +75,56 @@ class ProductoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Producto $producto)
     {
-        //
+        return view('producto.edit',compact('producto'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductoRequest $request, Producto $producto)
     {
-        //
+        try{
+            DB::beginTransaction();
+            
+            if($request->hasFile('imagen_path'))
+            {
+                    $name = $producto->hanbleUploadImage($request->file('imagen_path'));
+                    if(Storage::disk('public')->exists('/producto'.$producto->imagen_path)){
+                        Storage::disk('public')->delete('/producto'.$producto->imagen_path);
+                    }
+            }else{
+                $name=$producto->imagen_path;
+            }
+            $producto->fill([
+                'nombre'=> $request->nombre,
+                'descripcion'=> $request->descripcion,
+                'imagen_path'=> $name,
+                'precio'=> $request->precio,
+                'stock'=> $request->stock,
+            ]);
+
+            $producto->save();
+            DB::commit();
+
+        }
+        catch(\Exception $e){
+            DB::rollBack();
+            return back()->with('error', $e->getMessage()); 
+        }
+        
+        return redirect()->route('productos.index')->with('success','Producto Actualizado');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Producto $producto)
     {
-        //
+        $message = '';
+        $producto -> delete();
+
+        return redirect()->route('productos.index')->with('success','Producto Eliminado');
     }
 }

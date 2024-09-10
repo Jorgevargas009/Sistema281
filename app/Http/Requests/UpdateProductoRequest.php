@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProductoRequest extends FormRequest
+class UpdateProductoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,6 +21,7 @@ class StoreProductoRequest extends FormRequest
      */
     public function rules(): array
     {
+        $producto= $this->route('producto');
         return [
             'nombre' => 'required|max:100',
             'descripcion'=> 'nullable|max:255',
@@ -29,14 +30,6 @@ class StoreProductoRequest extends FormRequest
             'img_path'=> 'nullable|image|mimes:png,jpg,jpeg|max:2048',
         ];
     }
-
-    public function attributes(){
-        return [
-            'nombre'=> 'Nombre',
-        ];
-            
-    }
-
     public function messages(){
         return [
             'nombre.required'=> 'Se necesita asignar un nombre al producto',

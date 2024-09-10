@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Producto extends Model
 {
     use HasFactory;
-    protected $fillable = ['artesano_id', 'nombre', 'descripcion', 'precio', 'stock'];
+    protected $fillable = ['nombre', 'descripcion', 'imagen_path' ,'precio', 'stock'];
 
     public function artesano()
     {
@@ -26,5 +27,13 @@ class Producto extends Model
     public function detalle_compra()
     {
         return $this->hasMany(Detalle_Compra::class);
+    }
+
+    public function hanbleUploadImage($image){
+        $file=$image;
+        $name=time() . $file->getClientOriginalName();
+        /*$file->move(public_path().'/img/productos/', $name);*/
+        Storage::putFileAs('/public/productos/', $file, $name,'public');
+        return $name;
     }
 }

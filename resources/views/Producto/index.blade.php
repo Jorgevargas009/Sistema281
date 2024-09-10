@@ -10,21 +10,22 @@
 
 @section('content')
 @if (session('success'))
-<script> const Toast = Swal.mixin({
-  toast: true,
-  position: "top-end",
-  showConfirmButton: false,
-  timer: 1500,
-  timerProgressBar: true,
-  didOpen: (toast) => {
-    toast.onmouseenter = Swal.stopTimer;
-    toast.onmouseleave = Swal.resumeTimer;
-  }
-});
-Toast.fire({
-  icon: "success",
-  title: "Operacion exitosa"
-});
+<script>
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
+    Toast.fire({
+        icon: "success",
+        title: "Operacion exitosa"
+    });
 </script>
 
 @endif
@@ -35,48 +36,110 @@ Toast.fire({
         <li class="breadcrumb-item"><a href="{{route('panel')}}">Inicio</a></li>
         <li class="breadcrumb-item active">Productos</li>
     </ol>
-    
+
     <div class="mb-4"><a href="{{route('productos.create')}}"><button type="button" class="btn-primary">Añadir nuevo registro</button></a>
     </div>
     <div class="card mb-4">
-                            <div class="card-header">
-                                <i class="fas fa-table me-1"></i>
-                                Productos
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Productos
+        </div>
+        <div class="card-body">
+            <table id="datatablesSimple" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripcion</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ( $productos as $item )
+                    <tr>
+                        <td>{{$item->nombre}}</td>
+                        <td>{{$item->descripcion}}</td>
+                        <td>{{$item->precio}}</td>
+                        <td>{{$item->stock}}</td>
+                        <td>
+                            @if ($item->stock>0)
+                            <span class="fw-bolder rounder p-1 bg-success text-white">Disponible</span>
+                            @else
+                            <span class="fw-bolder rounder p-1 bg-danger text-white">Agotado</span>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                                <form action="{{route('productos.edit',['producto' =>$item])}}" method="get">
+                                    <button type="submit" class="btn btn-warning">Editar</button>
+                                </form>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#verModal-{{$item->id}}">Ver</button>
+
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarModal-{{$item->id}}">Eliminar</button>
                             </div>
-                            <div class="card-body">
-                                <table id="datatablesSimple" class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Position</th>
-                                            <th>Office</th>
-                                            <th>Age</th>
-                                            <th>Start date</th>
-                                            <th>Salary</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Tiger Nixon</td>
-                                            <td>System Architect</td>
-                                            <td>Edinburgh</td>
-                                            <td>61</td>
-                                            <td>2011/04/25</td>
-                                            <td>$320,800</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Garrett Winters</td>
-                                            <td>Accountant</td>
-                                            <td>Tokyo</td>
-                                            <td>63</td>
-                                            <td>2011/07/25</td>
-                                            <td>$170,750</td>
-                                        </tr>
-                                        
-                                    </tbody>
-                                </table>
+                        </td>
+                    </tr>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="verModal-{{$item->id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Detalles del producto</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row mb-3">
+                                        <label for=""><span class="fw-bolder">Descripción: </span> {{$item->descripcion}}</label>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label><span class="fw-bolder">Imagen: </span></label>
+                                        <div>
+                                            @if ($item->imagen_path != null)
+                                            <img src="{{Storage::url('public/productos/'.$item->imagen_path)}}" class="img-fluid img-thumbnail border border-4 rounded" alt="{{$item->nombre}}">
+
+                                            @else
+                                            <img src="" alt="{{$item->nombre}}">
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                    <!-- Modal -->
+                    <div class="modal fade" id="eliminarModal-{{$item->id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Mensaje de confirmacion</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ¿Seguro quieres eliminar este producto?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                    <form action="{{route('productos.destroy',['producto' =>$item])}}" method="post">
+                                        @method('DELETE')
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger">Confirmar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 @endsection
 

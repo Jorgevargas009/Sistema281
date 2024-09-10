@@ -1,6 +1,6 @@
 @extends('template')
 
-@section('title','Crear producto')
+@section('title','Editar producto')
 
 @push('css')
 <style>
@@ -14,40 +14,41 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4 text-center">Crear Productos</h1>
+    <h1 class="mt-4 text-center">Editar Productos</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{route('panel')}}">Inicio</a></li>
         <li class="breadcrumb-item"><a href="{{route('productos.index')}}">Productos</a></li>
-        <li class="breadcrumb-item active">Crear productos</li>
+        <li class="breadcrumb-item active">Editar productos</li>
     </ol>
     <div class="container w-100 border border-3 border-primary rounded p-4 mt-3">
-        <form action="{{route('productos.store')}}" method="post" enctype="multipart/form-data">
-            @csrf
+        <form action="{{route('productos.update',['producto'=>$producto])}}" method="post" enctype="multipart/form-data">
+        @method('PATCH')    
+        @csrf
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="nombre" class="form-label">Nombre:</label>
-                    <input type="text" name="nombre" id="nombre" class="form-control" value="{{old('nombre')}}">
+                    <input type="text" name="nombre" id="nombre" class="form-control" value="{{old('nombre',$producto->nombre)}}">
                     @error('nombre')
                     <small class="text-danger">{{'*'.$message}}</small>
                     @enderror
                 </div>
                 <div class="col-md-12">
                     <label for="descripcion" class="form-label" >Descripcion:</label>
-                    <textarea name="descripcion" id="descripcion" rows="3" class="form-control">{{old('descripcion')}}</textarea>
+                    <textarea name="descripcion" id="descripcion" rows="3" class="form-control">{{old('descripcion',$producto->descripcion)}}</textarea>
                     @error('descripcion')
                     <small class="text-danger">{{'*'.$message}}</small>
                     @enderror
                 </div>
                 <div class="col-md-6">
                     <label for="precio" class="form-label">Precio:</label>
-                    <input type="number" name="precio" id="precio" class="form-control" value="{{old('precio')}}">
+                    <input type="number" name="precio" id="precio" class="form-control" value="{{old('precio',$producto->precio)}}">
                     @error('precio')
                     <small class="text-danger">{{'*'.$message}}</small>
                     @enderror
                 </div>
                 <div class="col-md-6">
                     <label for="stock" class="form-label">Stock:</label>
-                    <input type="number" name="stock" id="stock" class="form-control" value="{{old('stock')}}">
+                    <input type="number" name="stock" id="stock" class="form-control" value="{{old('stock',$producto->stock)}}">
                     @error('stock')
                     <small class="text-danger">{{'*'.$message}}</small>
                     @enderror
