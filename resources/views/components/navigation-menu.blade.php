@@ -50,7 +50,7 @@
                                     </div>
                                 </nav>
                             </div-->
-                            <div class="sb-sidenav-menu-heading">Addons</div>
+                            <div class="sb-sidenav-menu-heading">Modulos</div>
                             <a class="nav-link" href="{{  route('productos.index')  }}">
                                 <div class="sb-nav-link-icon"><i class="fa-solid fa-shirt"></i></i></div>
                                 Productos
@@ -59,11 +59,20 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                                 Tablas
                             </a>
+                            <div class="sb-sidenav-menu-heading">Otros</div>
+                            <a class="nav-link" href="{{  route('users.index')  }}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-user"></i></i></div>
+                                Usuarios
+                            </a>
+                            <a class="nav-link" href="{{  route('roles.index')  }}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-person-circle-plus"></i></div>
+                                Roles
+                            </a>
                         </div>
                     </div>
                     <div class="sb-sidenav-footer">
                         <div class="small">Bienvenido:</div>
-                        Start Bootstrap
+                        {{auth()->user()->nombre}}
                     </div>
                 </nav>
             </div>
