@@ -32,6 +32,12 @@ class userController extends Controller
         return view( 'user.create',compact('roles'));
     }
 
+    public function register()
+    {
+        $roles = Role::all();
+        return view( 'user.register',compact('roles'));
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -54,9 +60,35 @@ class userController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
         }
+        if  ($request->tipo_registro='1') {
+            return redirect()->route('login')->with('success', 'Usuario registrado'); 
+        } else {
+            return redirect()->route('users.index')->with('success', 'Usuario registrado'); 
+        }
+    }
+
+    public function storelogin(StoreUserRequest $request)
+    {
+        
+        try {
+            DB::beginTransaction();
+            //Crear usuario
+            $fieldhash = Hash::make($request->password);
+
+            $request->merge(['password'=>$fieldhash]);
+
+            //Asignar permisos
+            $user = User::create($request->all());
+
+            //asignar rol
+            $user->assignRole($request->role);
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+        }
 
 
-        return redirect()->route('users.index')->with('success', 'Usuario registrado'); 
+        return redirect()->route('login')->with('success', 'Usuario registrado'); 
     }
 
     /**

@@ -26,6 +26,7 @@ class UpdateProductoRequest extends FormRequest
             'nombre' => 'required|max:100',
             'descripcion'=> 'nullable|max:255',
             'precio'=> 'required|not_in:0',
+            'precio_venta'=> 'required|not_in:0',
             'stock'=> 'required',
             'img_path'=> 'nullable|image|mimes:png,jpg,jpeg|max:2048',
         ];
@@ -34,6 +35,7 @@ class UpdateProductoRequest extends FormRequest
         return [
             'nombre.required'=> 'Se necesita asignar un nombre al producto',
             'precio.not_in'=> 'El precio del producto debe ser mayor a 0',
+            'precio_venta.not_in'=> 'El precio del producto debe ser mayor a 0',
         ];
     }
 }

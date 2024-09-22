@@ -28,6 +28,7 @@ class StoreUserRequest extends FormRequest
             "email"=> "required|email|max:255|unique:users,email",
             "password"=> "required|min:8|string|same:password_confirm|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/",
             "role"=> "required|exists:roles,name",
+            "tipo_Registro"=> "number",
         ];
     }
     

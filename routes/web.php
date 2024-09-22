@@ -6,7 +6,12 @@ use App\Http\Controllers\logoutController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\rolecontroller;
 use App\Http\Controllers\userController;
+use App\Mail\ConfirmacionMailable;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\inicioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,9 +24,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
+    ->middleware(['auth', 'signed'])
+    ->name('verification.verify');
+
+Route::post('/email/resend', [VerificationController::class, 'resend'])
+    ->middleware(['auth', 'throttle:6,1'])
+    ->name('verification.resend');
+    
 Route::get("/", [homeController::class,'index'])->name('panel');
 
+Route::get('/inicio', [inicioController::class, 'inicio']);
 
+//Auth::routes(['verify' => true]);
 
 Route::resources([
     'productos'=> ProductoController::class,
@@ -30,6 +45,7 @@ Route::resources([
 ]);
 
 Route::view('/categorias','categoria.index');
+Route::get('/register', [userController::class,'register'])->name('register');
 
 Route::get('/login', [loginController::class,'index'])->name('login');
 Route::post('/login', [loginController::class,'login']);
@@ -47,4 +63,9 @@ Route::get('/404', function () {
 
 Route::get('/500', function () {
     return view('pages.500');
+});
+
+Route::get('confirmacion', function () {
+    Mail::to(('danny.dxs.killer@gmail.com'))->send(new ConfirmacionMailable());
+    return "mensaje enviado";
 });

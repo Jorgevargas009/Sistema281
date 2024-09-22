@@ -49,6 +49,7 @@ class ProductoController extends Controller
                 'descripcion'=> $request->descripcion,
                 'imagen_path'=> $name,
                 'precio'=> $request->precio,
+                'precio_venta'=> $request->precio_venta,
                 'stock'=> $request->stock,
             ]);
 
@@ -102,6 +103,7 @@ class ProductoController extends Controller
                 'descripcion'=> $request->descripcion,
                 'imagen_path'=> $name,
                 'precio'=> $request->precio,
+                'precio_venta'=> $request->precio_venta,
                 'stock'=> $request->stock,
             ]);
 

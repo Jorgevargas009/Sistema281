@@ -17,7 +17,7 @@
     <h1 class="mt-4 text-center">Crear Usuario</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{route('panel')}}">Inicio</a></li>
-        <li class="breadcrumb-item"><a href="{{route('productos.index')}}">Usuarios</a></li>
+        <li class="breadcrumb-item"><a href="{{route('users.index')}}">Usuarios</a></li>
         <li class="breadcrumb-item active">Crear usuario</li>
     </ol>
     <div class="container w-100 border border-3 border-primary rounded p-4 mt-3">

@@ -46,6 +46,13 @@
                     @enderror
                 </div>
                 <div class="col-md-6">
+                    <label for="precio" class="form-label">Precio de venta:</label>
+                    <input type="number" name="precio_venta" id="precio_venta" class="form-control" value="{{old('precio_venta')}}">
+                    @error('precio_venta')
+                    <small class="text-danger">{{'*'.$message}}</small>
+                    @enderror
+                </div>
+                <div class="col-md-6">
                     <label for="stock" class="form-label">Stock:</label>
                     <input type="number" name="stock" id="stock" class="form-control" value="{{old('stock')}}">
                     @error('stock')

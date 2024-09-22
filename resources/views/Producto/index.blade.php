@@ -51,6 +51,7 @@
                         <th>Nombre</th>
                         <th>Descripcion</th>
                         <th>Precio</th>
+                        <th>Precio de venta</th>
                         <th>Stock</th>
                         <th>Estado</th>
                         <th>Acciones</th>
@@ -62,6 +63,7 @@
                         <td>{{$item->nombre}}</td>
                         <td>{{$item->descripcion}}</td>
                         <td>{{$item->precio}}</td>
+                        <td>{{$item->precio_venta}}</td>
                         <td>{{$item->stock}}</td>
                         <td>
                             @if ($item->stock>0)
