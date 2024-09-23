@@ -16,20 +16,19 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        /*$user = User::create([
+        $user = User::create([
             
             'nombre'=> 'Danny',
             'apellido'=> 'Apaza',
             'email'=> 'admin@gmail.com',
             'password'=> bcrypt('12345678'),
             
-        ]);*/
+        ]);
         //usuario administrador
 
         $rol = Role::create(['name'=>'administrador']);
         $permisos=Permission::pluck('id','id')->all();
         $rol->syncPermissions($permisos);
-        $user = User::find(1);
         $user->assignRole('administrador');
     }
 }

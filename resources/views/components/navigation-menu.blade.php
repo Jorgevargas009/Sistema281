@@ -53,6 +53,10 @@
                             <div class="sb-sidenav-menu-heading">Modulos</div>
                             <a class="nav-link" href="{{  route('productos.index')  }}">
                                 <div class="sb-nav-link-icon"><i class="fa-solid fa-shirt"></i></i></div>
+                                Mis Productos 
+                            </a>
+                            <a class="nav-link" href="{{  route('productos.all')  }}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-shirt"></i></i></div>
                                 Productos
                             </a>
                             <a class="nav-link" href="#">

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class Producto extends Model
 {
     use HasFactory;
-    protected $fillable = ['nombre', 'descripcion', 'imagen_path' ,'precio', 'stock'];
+    protected $fillable = ['nombre', 'user_id', 'descripcion', 'imagen_path' ,'precio','precio_venta', 'stock'];
 
     public function artesano()
     {
@@ -27,6 +27,11 @@ class Producto extends Model
     public function detalle_compra()
     {
         return $this->hasMany(Detalle_Compra::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function hanbleUploadImage($image){

@@ -17,9 +17,15 @@ class ProductoController extends Controller
     public function index()
     {
         /*$productos=Producto::with(['id artesano'])->latest()->get();*/
+        $productos = Producto::where('user_id', auth()->id())->get();
+        return view('producto.index', compact('productos'));
+    }
+    public function allProducts()
+    {
+        // Obtener todos los productos
         $productos = Producto::all();
-        return view('producto.index',compact('productos'));
 
+        return view('producto.all', compact('productos'));
     }
 
     /**
@@ -35,34 +41,32 @@ class ProductoController extends Controller
      */
     public function store(StoreProductoRequest $request)
     {
-        try{
+        try {
             DB::beginTransaction();
             $producto = new Producto();
-            if($request->hasFile('imagen_path'))
-            {
-                    $name = $producto->hanbleUploadImage($request->file('imagen_path'));
-            }else{
-                $name=null;
+            if ($request->hasFile('imagen_path')) {
+                $name = $producto->hanbleUploadImage($request->file('imagen_path'));
+            } else {
+                $name = null;
             }
             $producto->fill([
-                'nombre'=> $request->nombre,
-                'descripcion'=> $request->descripcion,
-                'imagen_path'=> $name,
-                'precio'=> $request->precio,
-                'precio_venta'=> $request->precio_venta,
-                'stock'=> $request->stock,
+                'user_id' => auth()->id(),
+                'nombre' => $request->nombre,
+                'descripcion' => $request->descripcion,
+                'imagen_path' => $name,
+                'precio' => $request->precio,
+                'precio_venta' => $request->precio_venta,
+                'stock' => $request->stock,
             ]);
 
             $producto->save();
             DB::commit();
-
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', $e->getMessage()); 
+            return back()->with('error', $e->getMessage());
         }
-        
-        return redirect()->route('productos.index')->with('success','Producto Registrado');
+
+        return redirect()->route('productos.index')->with('success', 'Producto Registrado');
     }
 
     /**
@@ -78,7 +82,7 @@ class ProductoController extends Controller
      */
     public function edit(Producto $producto)
     {
-        return view('producto.edit',compact('producto'));
+        return view('producto.edit', compact('producto'));
     }
 
     /**
@@ -86,37 +90,34 @@ class ProductoController extends Controller
      */
     public function update(UpdateProductoRequest $request, Producto $producto)
     {
-        try{
+        try {
             DB::beginTransaction();
-            
-            if($request->hasFile('imagen_path'))
-            {
-                    $name = $producto->hanbleUploadImage($request->file('imagen_path'));
-                    if(Storage::disk('public')->exists('/producto'.$producto->imagen_path)){
-                        Storage::disk('public')->delete('/producto'.$producto->imagen_path);
-                    }
-            }else{
-                $name=$producto->imagen_path;
+
+            if ($request->hasFile('imagen_path')) {
+                $name = $producto->hanbleUploadImage($request->file('imagen_path'));
+                if (Storage::disk('public')->exists('/producto' . $producto->imagen_path)) {
+                    Storage::disk('public')->delete('/producto' . $producto->imagen_path);
+                }
+            } else {
+                $name = $producto->imagen_path;
             }
             $producto->fill([
-                'nombre'=> $request->nombre,
-                'descripcion'=> $request->descripcion,
-                'imagen_path'=> $name,
-                'precio'=> $request->precio,
-                'precio_venta'=> $request->precio_venta,
-                'stock'=> $request->stock,
+                'nombre' => $request->nombre,
+                'descripcion' => $request->descripcion,
+                'imagen_path' => $name,
+                'precio' => $request->precio,
+                'precio_venta' => $request->precio_venta,
+                'stock' => $request->stock,
             ]);
 
             $producto->save();
             DB::commit();
-
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', $e->getMessage()); 
+            return back()->with('error', $e->getMessage());
         }
-        
-        return redirect()->route('productos.index')->with('success','Producto Actualizado');
+
+        return redirect()->route('productos.index')->with('success', 'Producto Actualizado');
     }
 
     /**
@@ -125,8 +126,8 @@ class ProductoController extends Controller
     public function destroy(Producto $producto)
     {
         $message = '';
-        $producto -> delete();
+        $producto->delete();
 
-        return redirect()->route('productos.index')->with('success','Producto Eliminado');
+        return redirect()->route('productos.index')->with('success', 'Producto Eliminado');
     }
 }

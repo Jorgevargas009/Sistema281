@@ -44,6 +44,9 @@ Route::resources([
     'roles'=> rolecontroller::class,
 ]);
 
+Route::get('/producto/all', [ProductoController::class, 'allProducts'])->name('productos.all');
+
+
 Route::view('/categorias','categoria.index');
 Route::get('/register', [userController::class,'register'])->name('register');
 
