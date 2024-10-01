@@ -28,6 +28,21 @@ class ProductoController extends Controller
         return view('producto.all', compact('productos'));
     }
 
+    public function ProductoComunidad()
+    {
+        // Obtener la comunidad del usuario autenticado
+        $userComunidad = auth()->user()->comunidad_id;
+    
+        // Filtrar productos por la comunidad del usuario
+        $productos = Producto::whereHas('user', function ($query) use ($userComunidad) {
+            $query->where('comunidad_id', $userComunidad);
+        })->get();
+    
+        // Retornar la vista con los productos filtrados
+
+        return view('producto.comunidad', compact('productos'));
+    }
+
     /**
      * Show the form for creating a new resource.
      */

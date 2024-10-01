@@ -54,6 +54,7 @@
                         <th>Email</th>
                         <th>Telefono</th>
                         <th>Rol</th> 
+                        <th>Comunidad</th> 
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -65,6 +66,8 @@
                         <td>{{$item->email}}</td>
                         <td>{{$item->telefono}}</td>
                         <td>{{$item->getRoleNames()->first()}}</td>
+                        <td>{{ $item->comunidad ? $item->comunidad->nombre : 'Sin comunidad' }}</td>
+
                         <td>
                             <div class="btn-group" role="group" aria-label="Basic mixed styles example">
                                 <form action="{{route('users.edit',['user' =>$item])}}" method="get">

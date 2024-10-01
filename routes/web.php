@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\DetalleController;
 use App\Http\Controllers\inicioController;
+use App\Models\Detalle_compra;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +26,7 @@ use App\Http\Controllers\inicioController;
 |
 */
 
+// Rutas para verificación de correo
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
     ->middleware(['auth', 'signed'])
     ->name('verification.verify');
@@ -31,28 +34,47 @@ Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'
 Route::post('/email/resend', [VerificationController::class, 'resend'])
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.resend');
-    
-Route::get("/", [homeController::class,'index'])->name('panel');
+Route::get('email/verify', [App\Http\Controllers\Auth\VerificationController::class, 'show'])->name('verification.notice');
 
+Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
+    ->middleware(['auth', 'signed'])
+    ->name('verification.verify');
+
+    // Ruta para mostrar el formulario de verificación
+Route::get('/verify', [loginController::class, 'showVerificationForm'])->name('verify');
+
+// Ruta para procesar el código de verificación ingresado
+Route::post('/verify', [loginController::class, 'verifyCode'])->name('verify.code');
+// Ruta para la página principal
+Route::get("/", [homeController::class, 'index'])->name('panel');
+
+// Ruta para la página de inicio
 Route::get('/inicio', [inicioController::class, 'inicio']);
 
-//Auth::routes(['verify' => true]);
+// Rutas de autenticación con verificación de correo habilitada
+Auth::routes(['verify' => true]);
 
+// Protege las rutas que requieren que el usuario esté verificado
+//Route::middleware(['auth', 'verified'])->group(function () {
 Route::resources([
-    'productos'=> ProductoController::class,
-    'users'=> userController::class,
-    'roles'=> rolecontroller::class,
+    'productos' => ProductoController::class,
+    'users' => userController::class,
+    'roles' => rolecontroller::class,
+    'detalle_compras' => DetalleController::class,
 ]);
+Route::post('/detalle_compras/store/{producto}', [DetalleController::class, 'store'])->name('detalle_compras.store');
 
-Route::get('/producto/all', [ProductoController::class, 'allProducts'])->name('productos.all');
+// Vista de categorías protegida por autenticación y verificación
+Route::view('/categorias', 'categoria.index');
+//});
+Route::get('/detalle_compra/index', [DetalleController::class, 'index'])->name('detalle_compras.index');
+Route::put('/detalle_compras/{detalle_compra}', [DetalleController::class, 'update'])->name('detalle_compras.update');
+// Rutas de registro y login
+Route::get('/register', [userController::class, 'register'])->name('register');
 
-
-Route::view('/categorias','categoria.index');
-Route::get('/register', [userController::class,'register'])->name('register');
-
-Route::get('/login', [loginController::class,'index'])->name('login');
-Route::post('/login', [loginController::class,'login']);
-Route::get('/logout', [logoutController::class,'logout'])->name('logout');
+Route::get('/login', [loginController::class, 'index'])->name('login');
+Route::post('/login', [loginController::class, 'login']);
+Route::get('/logout', [logoutController::class, 'logout'])->name('logout');
 
 Route::get('/401', function () {
     return view('pages.401');
@@ -68,7 +90,6 @@ Route::get('/500', function () {
     return view('pages.500');
 });
 
-Route::get('confirmacion', function () {
-    Mail::to(('danny.dxs.killer@gmail.com'))->send(new ConfirmacionMailable());
-    return "mensaje enviado";
-});
+Route::get('/producto/all', [ProductoController::class, 'allProducts'])->name('productos.all');
+
+Route::get('/producto/comunidad', [ProductoController::class, 'ProductoComunidad'])->name('productos.comunidad');

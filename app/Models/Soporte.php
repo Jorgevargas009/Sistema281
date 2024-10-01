@@ -9,8 +9,8 @@ class Soporte extends Model
 {
     use HasFactory;
     
-    public function cliente()
+    public function user()
     {
-        return $this->belongsTo(Cliente::class);
+        return $this->belongsTo(User::class);
     }
 }

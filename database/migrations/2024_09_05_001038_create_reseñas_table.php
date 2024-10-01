@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('reseñas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cliente_id')->constrained('clientes');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('producto_id')->constrained('productos');
             $table->integer('calificacion')->check('calificacion between 1 and 5');
             $table->text('comentario')->nullable();

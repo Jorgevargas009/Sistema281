@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('soportes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cliente_id')->constrained('clientes');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('asunto', 100);
             $table->text('descripcion')->nullable();
             $table->dateTime('fecha_creacion');

@@ -59,6 +59,14 @@
                                 <div class="sb-nav-link-icon"><i class="fa-solid fa-shirt"></i></i></div>
                                 Productos
                             </a>
+                            <a class="nav-link" href="{{  route('productos.comunidad')  }}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-shirt"></i></i></div>
+                                Productos de mi comunidad
+                            </a>
+                            <a class="nav-link" href="{{  route('detalle_compras.index')  }}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-cart-shopping"></i></i></i></div>
+                                Mi Carrito
+                            </a>
                             <a class="nav-link" href="#">
                                 <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                                 Tablas
@@ -76,7 +84,10 @@
                     </div>
                     <div class="sb-sidenav-footer">
                         <div class="small">Bienvenido:</div>
-                        {{auth()->user()->nombre}}
+                        {{auth()->user()->nombre.' '.auth()->user()->apellido}}
+                        <div class="small">Comunidad:</div>
+                        {{ auth()->user()->comunidad->nombre }}
+
                     </div>
                 </nav>
             </div>

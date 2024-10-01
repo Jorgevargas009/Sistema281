@@ -11,11 +11,6 @@ class Producto extends Model
     use HasFactory;
     protected $fillable = ['nombre', 'user_id', 'descripcion', 'imagen_path' ,'precio','precio_venta', 'stock'];
 
-    public function artesano()
-    {
-        return $this->belongsTo(Artesano::class);
-    }
-
     public function reseña()
     {
         return $this->hasMany(Reseña::class);

@@ -11,7 +11,7 @@ class Detalle_compra extends Model
 
     protected $fillable = ['carro_compra_id', 'producto_id', 'cantidad'];
 
-    public function carroCompra()
+    public function carro_compra()
     {
         return $this->belongsTo(Carro_compra::class);
     }

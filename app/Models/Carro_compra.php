@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Carro_compra extends Model
 {
     use HasFactory;
-    protected $fillable = ['cliente_id', 'total', 'fecha_creacion'];
+    protected $fillable = ['user_id', 'total', 'fecha_creacion'];
 
     public function cliente()
     {
-        return $this->belongsTo(Cliente::class);
+        return $this->belongsTo(User::class);
     }
 
     public function detalle_compra()

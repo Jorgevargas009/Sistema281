@@ -25,33 +25,20 @@ class User extends Authenticatable implements MustVerifyEmail
         'apellido', 
         'email', 
         'telefono', 
-        'password'
+        'password',
+        'comunidad_id'
     ];
 
-    // Relación con administradores
-    public function administradore()
+    public function comunidad()
     {
-        return $this->hasOne(Administradore::class);
+        return $this->belongsTo(Comunidade::class, 'comunidad_id');
     }
-
-    // Relación con artesanos
-    public function artesano()
+    
+    // Relación con el modelo Producto
+    public function productos()
     {
-        return $this->hasOne(Artesano::class);
+        return $this->hasMany(Producto::class);
     }
-
-    // Relación con clientes
-    public function cliente()
-    {
-        return $this->hasOne(Cliente::class);
-    }
-
-    // Relación con repartidores
-    public function repartidore()
-    {
-        return $this->hasOne(Repartidore::class);
-    }
-
     // Relación con direcciones
     public function direcciones()
     {

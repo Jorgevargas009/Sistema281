@@ -24,12 +24,11 @@
     });
     Toast.fire({
         icon: "success",
-        title: "Operacion exitosa"
+        title: "Producto agregado exitosamente"
     });
 </script>
 
 @endif
-
 @if ($errors->has('error'))
 <script>
     Toast = Swal.mixin({
@@ -49,6 +48,7 @@
     });
 </script>
 @endif
+
 <div class="container-fluid px-4">
     <h1 class="mt-4 text-center">Productos</h1>
     <ol class="breadcrumb mb-4">
@@ -69,10 +69,10 @@
                     <tr>
                         <th>Nombre</th>
                         <th>Descripcion</th>
-                        <th>Precio</th>
                         <th>Precio de venta</th>
-                        <th>Stock</th>
+                        <th>Stock disponible</th>
                         <th>Estado</th>
+                        <th>Cantidad a pedir</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -81,7 +81,6 @@
                     <tr>
                         <td>{{$item->nombre}}</td>
                         <td>{{$item->descripcion}}</td>
-                        <td>{{$item->precio}}</td>
                         <td>{{$item->precio_venta}}</td>
                         <td>{{$item->stock}}</td>
                         <td>
@@ -91,15 +90,29 @@
                             <span class="fw-bolder rounder p-1 bg-danger text-white">Agotado</span>
                             @endif
                         </td>
+
+                        <td>
+                            <form action="{{ route('detalle_compras.store', ['producto' => $item]) }}" method="post">
+                                @csrf
+                                <input type="number" name="cantidad" class="form-control" id="cantidad-{{$item->id}}" value="1" min="1" max="{{ $item->stock }}" required {{ $item->stock == 0 ? 'disabled' : '' }}>
+                                <small class="text-muted">Stock disponible: {{ $item->stock }}</small>
+                        </td>
+
                         <td>
                             <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                                <form action="{{route('productos.edit',['producto' =>$item])}}" method="get">
-                                    <button type="submit" class="btn btn-warning">Editar</button>
-                                </form>
-                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#verModal-{{$item->id}}">Ver</button>
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#verModal-{{$item->id}}">Ver</button>
 
-                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarModal-{{$item->id}}">Eliminar</button>
+                                <!-- Botón para abrir el modal de confirmación -->
+                                <button type="button" class="btn btn-success" {{ $item->stock == 0 ? 'disabled' : '' }}
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirmarModal-{{$item->id}}"
+                                    onclick="setModalData({{ $item->id }}, {{ $item->precio_venta }}, {{ $item->stock }})">
+                                    Añadir al carro
+                                </button>
+                                <form action="{{ route('detalle_compras.store', ['producto' => $item]) }}" method="POST">
+                                    </form>
                             </div>
+
                         </td>
                     </tr>
 
@@ -133,23 +146,31 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Modal -->
-                    <div class="modal fade" id="eliminarModal-{{$item->id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <!-- Modal --><!-- Modal -->
+                    <div class="modal fade" id="confirmarModal-{{$item->id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Mensaje de confirmacion</h1>
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmar Pedido</h1>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    ¿Seguro quieres eliminar este producto?
+                                    <p><strong>Producto:</strong> {{$item->nombre}}</p>
+                                    <p><strong>Descripción:</strong> {{$item->descripcion}}</p>
+                                    <p><strong>Precio de venta:</strong> {{$item->precio_venta}}</p>
+                                    <p><strong>Cantidad solicitada:</strong> <span id="cantidad-modal-{{$item->id}}">0</span></p>
+                                    <p><strong>Stock disponible:</strong> {{$item->stock}}</p>
+                                    <p><strong>Total:</strong> <span id="total-modal-{{$item->id}}">0</span></p>
+                                    <p>¿Estás seguro que deseas añadir este producto al carrito?</p>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                    <form action="{{route('productos.destroy',['producto' =>$item])}}" method="post">
-                                        @method('DELETE')
+                                    <form action="{{ route('detalle_compras.store', ['producto' => $item]) }}" method="POST">
                                         @csrf
-                                        <button type="submit" class="btn btn-danger">Confirmar</button>
+                                        <input type="hidden" name="cantidad" id="cantidad-input-{{$item->id}}">
+                                        <input type="hidden" name="producto" value="{{ $item->id }}">
+
+                                        <button type="submit" class="btn btn-success">Confirmar</button>
                                     </form>
                                 </div>
                             </div>
@@ -167,4 +188,22 @@
 @push('js')
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
 <script src=" {{asset('js/datatables-simple-demo.js')}}"></script>
+
+<script>
+    function setModalData(productId, precioVenta, stock) {
+        // Obtener la cantidad del campo de entrada utilizando el ID correcto
+        const cantidadInput = document.querySelector(`#cantidad-${productId}`);
+        const cantidad = cantidadInput ? cantidadInput.value : 0; // Asegurarse de que no sea null
+
+        // Calcular el total
+        const total = cantidad * precioVenta;
+
+        // Actualizar los valores en el modal
+        document.querySelector(`#cantidad-modal-${productId}`).innerText = cantidad;
+        document.querySelector(`#total-modal-${productId}`).innerText = total;
+
+        // Pasar la cantidad al campo oculto del formulario en el modal
+        document.querySelector(`#cantidad-input-${productId}`).value = cantidad;
+    }
+</script>
 @endpush

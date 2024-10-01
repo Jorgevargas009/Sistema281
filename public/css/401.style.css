@@ -1,0 +1,295 @@
+
+/* Mantener las configuraciones iniciales globales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    color: #ffffff;
+    background: url('https://images.pexels.com/photos/2344613/pexels-photo-2344613.jpeg?cs=srgb&dl=pexels-korhan-erdol-1123380-2344613.jpg&fm=jpg') no-repeat center center fixed;
+    background-size: cover; /* Hace que la imagen cubra todo el body */
+}
+/* Barra de navegación */
+.navbar {
+    display: flex;
+    justify-content: space-between; /* Distribuye el logo y los enlaces */
+    align-items: center;
+    background-color: rgba(128, 128, 128, 0.75); /* Café claro transparente */
+    padding: 10px 20px;
+    position: fixed;
+    width: 100%; /* La barra ocupa el 100% del ancho de la pantalla */
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    font-size: 1.3rem;
+}
+/* Logo y ajustes para que sea visible */
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 2rem;/*1.5*/
+    color: #8B4513; /* Cambié el color a rosa */
+    font-weight: 700; /* Fuente más gruesa */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+
+
+.logo img {
+    border-radius: 20%;
+    width: 5cm; /* Ancho en centímetros */
+    height: 5cm; /* Alto en centímetros */
+    margin-right: 30px;
+    animation: pump 1s infinite; /* Llama a la animación */
+}
+
+@keyframes pump {
+    0% {
+        transform: scale(1); /* Tamaño original */
+    }
+    50% {
+        transform: scale(1.1); /* Aumenta el tamaño */
+    }
+    100% {
+        transform: scale(1); /* Regresa al tamaño original */
+    }
+}
+/* Enlaces de la barra */
+.navbar nav ul {
+    display: flex;
+    list-style: none;
+}
+
+.navbar nav ul li {
+    margin: 0 20px;
+}
+
+.navbar nav ul li a {
+    text-decoration: none;
+    color: #000000; /* Cambié el color del texto a blanco */
+    font-weight: bold;
+}
+/* Botón Únete */
+.join-btn {
+    background-color: #8B4513; /* Color café para el botón */
+    color: #fff; /* Mantener el texto en blanco */
+    padding: 15px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+/* Sección de bienvenida */
+.welcome-section {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh; /* Ocupa toda la altura de la ventana */
+    background: url('https://images.pexels.com/photos/2344613/pexels-photo-2344613.jpeg?cs=srgb&dl=pexels-korhan-erdol-1123380-2344613.jpg&fm=jpg') no-repeat center center;
+    background-size: cover; /* La imagen cubrirá toda la sección */
+    background-attachment: fixed; /* Fija la imagen de fondo */
+    text-align: left;
+    padding-left: 50px;
+    margin-top: 130px;
+}
+
+.welcome-content {
+    position: absolute; /* Permite colocar el texto sobre el fondo */
+    left: 50px; /* Ajusta el espacio desde la izquierda */
+    top: 50%; /* Centra verticalmente */
+    transform: translateY(-50%); /* Ajusta la posición verticalmente */
+}
+
+
+/* Texto de bienvenida con estilo moderno */
+.welcome-content h1 {
+    font-size: 5rem; /* Tamaño grande para el texto de bienvenida */
+    color: #ffb677; /* Naranja oscuro */
+    font-weight: 700; /* Fuente más gruesa */
+    font-family: 'Montserrat', sans-serif; /* Fuente moderna */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Sombra de texto */
+    transform: translateY(-5px); /* Desplazamiento sutil hacia arriba */
+    transition: transform 0.3s ease; /* Transición suave */
+}
+
+/* Efecto al pasar el mouse sobre el texto de bienvenida */
+.welcome-content h1:hover {
+    transform: translateY(-10px); /* Efecto de desplazamiento al pasar el mouse */
+}
+
+/* Texto de párrafo con estilo moderno */
+.welcome-content p {
+    margin: 20px 0;
+    font-size: 1.2rem;
+    color: #ffffff; /* Negro */
+    font-weight: 600; /* Fuente más gruesa */
+    font-family: 'Montserrat', sans-serif; /* Fuente moderna */
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5); /* Sombra de texto para el párrafo */
+}
+
+.discover-btn {
+    display: none; /* Oculta el botón */
+}
+
+
+/* Sección acerca de */
+.about-section {
+    padding: 50px 0;
+    background-color: #f9f9f9;
+}
+
+.about-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.about-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.about-text {
+    max-width: 600px;
+    margin-left: 40px;
+}
+
+.about-text h2 {
+    font-size: 3rem;
+    color: #000000;
+    margin-bottom: 20px;
+}
+
+.about-text p {
+    font-size: 1.2rem;
+    color: #000000;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.marquee-section {
+    background-color: #8B4513; /* Color de fondo para la sección */
+    padding: 20px 0; /* Espaciado superior e inferior */
+    overflow: hidden; /* Oculta el desbordamiento */
+}
+
+.marquee {
+    display: flex; /* Usar flexbox para alinear horizontalmente */
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    animation: marquee 15s linear infinite; /* Define la animación */
+}
+
+.marquee p {
+    font-size: 2.5rem; /* Tamaño del texto aumentado a 2.5rem */
+    color: #ffffff; /* Color del texto */
+    padding-left: 100%; /* Espacio inicial */
+}
+
+/* Animación de movimiento */
+@keyframes marquee {
+    0% {
+        transform: translate(0); /* Comienza en su posición original */
+    }
+    100% {
+        transform: translate(-100%); /* Se mueve completamente hacia la izquierda */
+    }
+}
+
+/* Sección de contacto */
+.contact-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px 0;
+    background-color: #f9f9f9;
+}
+
+.contact-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    width: 100%;
+    gap: 20px;
+    padding: 20px;
+}
+
+.contact-info {
+    background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    font-family: 'Montserrat', sans-serif; /* Fuente moderna */
+    max-width: 400px; /* Ancho máximo para la caja de información */
+}
+
+.contact-info h2 {
+    font-size: 2rem;
+    color: #8B4513; /* Color del título */
+    margin-bottom: 20px;
+}
+
+.contact-info p {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+iframe {
+    border: none;
+    border-radius: 10px; /* Bordes redondeados para el mapa */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    max-width: 800px; /* Ancho máximo del mapa */
+    height: 450px;
+}
+
+
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+ 

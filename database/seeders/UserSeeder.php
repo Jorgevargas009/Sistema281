@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::create([
+        /*$user = User::create([
             
             'nombre'=> 'Danny',
             'apellido'=> 'Apaza',
@@ -30,5 +30,10 @@ class UserSeeder extends Seeder
         $permisos=Permission::pluck('id','id')->all();
         $rol->syncPermissions($permisos);
         $user->assignRole('administrador');
+*/
+
+        $rol = Role::create(['name' => 'artesano']);
+        $rol = Role::create(['name' => 'cliente']);
+        $rol = Role::create(['name' => 'repartidor']);
     }
 }

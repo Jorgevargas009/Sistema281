@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Comunidade;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -29,13 +30,14 @@ class userController extends Controller
     public function create()
     {
         $roles = Role::all();
-        return view( 'user.create',compact('roles'));
+        $comunidades = Comunidade::all();
+        return view('user.create', compact('roles', 'comunidades'));
     }
 
     public function register()
     {
         $roles = Role::all();
-        return view( 'user.register',compact('roles'));
+        return view('user.register', compact('roles'));
     }
 
     /**
@@ -43,52 +45,83 @@ class userController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        
         try {
             DB::beginTransaction();
-            //Crear usuario
+
+            // Crear usuario
             $fieldhash = Hash::make($request->password);
+            $request->merge(['password' => $fieldhash]);
+            // Priorizar la comunidad seleccionada
+            if ($request->comunidade!=null) {
+                $comunidad_id = Comunidade::find($request->comunidade);
+                
 
-            $request->merge(['password'=>$fieldhash]);
+            } elseif ($request->nueva_comunidad) {
+                $comunidad_id = Comunidade::create([
+                    'nombre' => $request->nueva_comunidad,
+                ]);
+            } else {
+                // Lanzar un error si no se selecciona ni se ingresa una comunidad
+                return redirect()->back()->withErrors(['comunidade' => 'Debe seleccionar o ingresar una comunidad.'])->withInput();
+            }
+            // Crear el usuario con la comunidad seleccionada o creada
+            $user = User::create(array_merge($request->all(), [
+                'comunidad_id' => $comunidad_id->id, // Asignar la comunidad al usuario
+            ]));
 
-            //Asignar permisos
-            $user = User::create($request->all());
-
-            //asignar rol
+            // Asignar rol
             $user->assignRole($request->role);
+
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Ocurrió un error al registrar el usuario.'])->withInput();
         }
-        if  ($request->tipo_registro='1') {
-            return redirect()->route('login')->with('success', 'Usuario registrado'); 
+
+        // Verificar la fuente del request
+        if ($request->source != 'registration') {
+            return redirect()->route('users.index')->with('success', 'Usuario registrado');
         } else {
-            return redirect()->route('users.index')->with('success', 'Usuario registrado'); 
+            return redirect()->route('login')->with('success', 'Usuario registrado');
         }
     }
 
     public function storelogin(StoreUserRequest $request)
     {
-        
         try {
             DB::beginTransaction();
-            //Crear usuario
+
+            // Crear usuario
             $fieldhash = Hash::make($request->password);
+            $request->merge(['password' => $fieldhash]);
 
-            $request->merge(['password'=>$fieldhash]);
+            // Priorizar la comunidad seleccionada
+            if ($request->comunidade) {
+                $comunidad = Comunidade::find($request->comunidad_id);
+            } elseif ($request->nueva_comunidad) {
+                $comunidad = Comunidade::create([
+                    'nombre' => $request->nueva_comunidad,
+                ]);
+            } else {
+                // Lanzar un error si no se selecciona ni se ingresa una comunidad
+                return redirect()->back()->withErrors(['comunidad_id' => 'Debe seleccionar o ingresar una comunidad.'])->withInput();
+            }
 
-            //Asignar permisos
-            $user = User::create($request->all());
+            // Crear el usuario con la comunidad seleccionada o creada
+            $user = User::create(array_merge($request->all(), [
+                'comunidad_id' => $comunidad->id, // Asignar la comunidad al usuario
+            ]));
 
-            //asignar rol
+            // Asignar rol
             $user->assignRole($request->role);
+
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Ocurrió un error al registrar el usuario.'])->withInput();
         }
 
-
-        return redirect()->route('login')->with('success', 'Usuario registrado'); 
+        return redirect()->route('login')->with('success', 'Usuario registrado');
     }
 
     /**
@@ -105,7 +138,8 @@ class userController extends Controller
     public function edit(User $user)
     {
         $roles = Role::all();
-        return view( 'user.edit',compact('user','roles'));
+        $comunidades = Comunidade::all();
+        return view('user.edit', compact('user', 'roles', 'comunidades'));
     }
 
     /**
@@ -113,22 +147,47 @@ class userController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        try {   
+        try {
             DB::beginTransaction();
-            if(empty($request->password)) {
-                $request=Arr::except($request,array('password'));
+
+            // Actualizar la contraseña solo si se proporciona una nueva
+            if (empty($request->password)) {
+                $request = Arr::except($request, ['password']);
             } else {
                 $fieldhash = Hash::make($request->password);
-                $request->merge(['password'=>$fieldhash]);
+                $request->merge(['password' => $fieldhash]);
             }
-            $user->update($request->all());
+
+            // Priorizar la comunidad seleccionada o crear una nueva
+            if ($request->comunidade) {
+                // Si se selecciona una comunidad existente
+                $comunidad_id = $request->comunidade;
+            } elseif ($request->nueva_comunidad) {
+                // Si se ingresa una nueva comunidad
+                $comunidad = Comunidade::create([
+                    'nombre' => $request->nueva_comunidad,
+                ]);
+                $comunidad_id = $comunidad->id;
+            } else {
+                // Lanzar un error si no se selecciona ni se ingresa una comunidad
+                return redirect()->back()->withErrors(['comunidad_id' => 'Debe seleccionar o ingresar una comunidad.'])->withInput();
+            }
+
+            // Actualizar el usuario con la comunidad seleccionada o creada
+            $user->update(array_merge($request->all(), [
+                'comunidad_id' => $comunidad_id,
+            ]));
+
+            // Sincronizar roles
             $user->syncRoles($request->role);
+
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Ocurrió un error al actualizar el usuario.'])->withInput();
         }
-        
-        return redirect()->route('users.index')->with('success', 'Usuario actualizado'); 
+
+        return redirect()->route('users.index')->with('success', 'Usuario actualizado');
     }
 
     /**
@@ -138,11 +197,10 @@ class userController extends Controller
     {
         $user = User::find($id);
 
-        $rolUser= $user->getRoleNames()->first();
+        $rolUser = $user->getRoleNames()->first();
         $user->removeRole($rolUser);
 
         $user->delete();
-        return redirect()->route('users.index')->with('success', 'Usuario eliminado'); 
-    
+        return redirect()->route('users.index')->with('success', 'Usuario eliminado');
     }
 }

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('carro_compra_id')->constrained('carro_compras');
-            $table->foreignId('repartidore_id')->nullable()->constrained('repartidores');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('direccione_id')->constrained('direcciones');
             $table->dateTime('fecha_pedido');
             $table->dateTime('fecha_entrega')->nullable();

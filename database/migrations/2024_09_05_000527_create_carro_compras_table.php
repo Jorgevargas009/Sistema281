@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('carro_compras', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cliente_id')->constrained('clientes');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->decimal('total', 10, 2);
             $table->dateTime('fecha_creacion');
             $table->timestamps();
