@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\DetalleController;
 use App\Http\Controllers\inicioController;
+use App\Http\Controllers\PagoController;
 use App\Models\Detalle_compra;
 
 /*
@@ -61,6 +62,7 @@ Route::resources([
     'users' => userController::class,
     'roles' => rolecontroller::class,
     'detalle_compras' => DetalleController::class,
+    'pagos' => PagoController::class,
 ]);
 Route::post('/detalle_compras/store/{producto}', [DetalleController::class, 'store'])->name('detalle_compras.store');
 
@@ -79,6 +81,16 @@ Route::get('/logout', [logoutController::class, 'logout'])->name('logout');
 Route::get('/401', function () {
     return view('pages.401');
 });
+
+// Ruta para listar todos los pagos
+Route::get('/Pago/index', [PagoController::class, 'index'])->name('Pago.index');
+
+// Ruta para confirmar un pago
+Route::post('/pagos/confirmar/{id}', [PagoController::class, 'confirmarPago'])->name('pagos.confirmar');
+Route::post('/pagos/store', [PagoController::class, 'store'])->name('pagos.store');
+
+Route::post('/pagos/{id}/aprobar', [PagoController::class, 'aprobarPago'])->name('pagos.aprobar');
+Route::post('/pagos/{id}/rechazar', [PagoController::class, 'rechazarPago'])->name('pagos.rechazar');
 
 
 Route::get('/404', function () {

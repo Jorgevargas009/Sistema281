@@ -67,6 +67,10 @@
                                 <div class="sb-nav-link-icon"><i class="fa-solid fa-cart-shopping"></i></i></i></div>
                                 Mi Carrito
                             </a>
+                            <a class="nav-link" href="{{  route('Pago.index')  }}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-credit-card"></i></i></i></div>
+                                Pagos
+                            </a>
                             <a class="nav-link" href="#">
                                 <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                                 Tablas

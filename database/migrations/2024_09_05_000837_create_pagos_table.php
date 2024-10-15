@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('pagos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('carro_compra_id')->constrained('carro_compras');
-            $table->enum('forma_pago', ['tarjeta', 'paypal', 'transferencia']);
-            $table->dateTime('fecha_pago');
+            $table->enum('forma_pago', ['tarjeta', 'paypal', 'transferencia', 'qr']); // Agregar 4 formas de pago
+            $table->bigInteger('codigo'); // Para el número de tarjeta o traspaso
+            $table->enum('estado', ['pendiente', 'aceptado'])->default('pendiente'); // Estado del pago
             $table->timestamps();
         });
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('carro_compra_id')->constrained('carro_compras');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->foreignId('direccione_id')->constrained('direcciones');
+            $table->foreignId('direccione_id')->constrained('direcciones')->nullable();
             $table->dateTime('fecha_pedido');
             $table->dateTime('fecha_entrega')->nullable();
             $table->enum('estado_entrega', ['pendiente', 'en camino', 'entregado']);
