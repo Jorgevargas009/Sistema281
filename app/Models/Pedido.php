@@ -9,20 +9,20 @@ class Pedido extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['carro_compra_id', 'user_id', 'direccion_id', 'fecha_pedido', 'fecha_entrega', 'estado_entrega', 'total'];
+    protected $fillable = ['carro_compra_id', 'user_id', 'direccione_id', 'fecha_pedido', 'fecha_entrega', 'estado_entrega', 'total'];
 
     public function carro_compra()
     {
-        return $this->hasOne(Carro_compra::class);
+        return $this->belongsTo(Carro_compra::class);
     }
 
-    public function repartidor()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
     public function direccion()
     {
-        return $this->belongsTo(Direccione::class);
+        return $this->belongsTo(Direccione::class, 'direccione_id');
     }
 }

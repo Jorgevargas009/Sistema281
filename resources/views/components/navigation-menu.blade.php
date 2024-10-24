@@ -71,6 +71,18 @@
                                 <div class="sb-nav-link-icon"><i class="fa-solid fa-credit-card"></i></i></i></div>
                                 Pagos
                             </a>
+                            <a class="nav-link" href="{{  route('pedidos.index')  }}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-truck"></i></i></i></div>
+                                Mi Pedido
+                            </a>
+                            <a class="nav-link" href="{{  route('pedidos.all')  }}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-box"></i></i></i></div>
+                                Pedidos
+                            </a>
+                            <a class="nav-link" href="{{  route('pedidos.comunidad')  }}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-box"></i></i></i></div>
+                                Pedidos de mi comunidad
+                            </a>
                             <a class="nav-link" href="#">
                                 <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                                 Tablas

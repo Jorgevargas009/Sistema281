@@ -12,8 +12,10 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\DetalleController;
+use App\Http\Controllers\DireccioneController;
 use App\Http\Controllers\inicioController;
 use App\Http\Controllers\PagoController;
+use App\Http\Controllers\PedidoController;
 use App\Models\Detalle_compra;
 
 /*
@@ -41,9 +43,16 @@ Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'
     ->middleware(['auth', 'signed'])
     ->name('verification.verify');
 
-    // Ruta para mostrar el formulario de verificación
+// Ruta para mostrar el formulario de verificación
 Route::get('/verify', [loginController::class, 'showVerificationForm'])->name('verify');
 
+// Ruta correcta para la comunidad
+Route::get('/pedidos/comunidad', [PedidoController::class, 'comunidad'])->name('pedidos.comunidad');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/pedidos/all', [PedidoController::class, 'all'])->name('pedidos.all');
+    Route::post('/pedidos/aceptar/{id}', [PedidoController::class, 'aceptar'])->name('pedidos.aceptar');
+});
 // Ruta para procesar el código de verificación ingresado
 Route::post('/verify', [loginController::class, 'verifyCode'])->name('verify.code');
 // Ruta para la página principal
@@ -63,7 +72,16 @@ Route::resources([
     'roles' => rolecontroller::class,
     'detalle_compras' => DetalleController::class,
     'pagos' => PagoController::class,
+    'pedidos' => PedidoController::class,
 ]);
+Route::post('/pedidos/recibido/{pedido}', [PedidoController::class, 'confirmarRecepcion'])->name('pedidos.recibido');
+// Ejemplo de ruta en web.php
+Route::get('/pedido/confirmar/{id}', [PedidoController::class, 'confirmarRecepcion'])->name('pedido.confirmar');
+
+Route::get('/Pedido/index', [PedidoController::class, 'index'])->name('pedidos.index')->middleware('auth');
+Route::post('/direcciones/guardar', [DireccioneController::class, 'guardar'])->name('direcciones.guardar');
+Route::post('/direcciones/asociar/{pedido}', [DireccioneController::class, 'asociarDireccion'])->name('direcciones.asociar');
+
 Route::post('/detalle_compras/store/{producto}', [DetalleController::class, 'store'])->name('detalle_compras.store');
 
 // Vista de categorías protegida por autenticación y verificación

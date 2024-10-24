@@ -33,7 +33,6 @@ class PagoController extends Controller
 
         $pedido = Pedido::create([
             'carro_compra_id' => $carroCompra->id,
-            'user_id' => $carroCompra->user_id,
             'direccione_id' => $carroCompra->direccione_id,
             'fecha_pedido' => now(), // Fecha actual
             'total' => $carroCompra->total,
