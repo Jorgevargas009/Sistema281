@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Carro_compra;
 use App\Models\Detalle_compra;
+use App\Models\Notificacion; // Asegúrate de importar el modelo de Notificación
+use App\Models\Notificacione;
 use App\Models\Producto;
 use App\Models\Promocione;
 use Illuminate\Http\Request;
@@ -12,6 +14,23 @@ use Illuminate\Support\Facades\DB;
 
 class DetalleController extends Controller
 {
+    public function __construct()
+    {
+        // Requiere permiso para ver el carrito
+        $this->middleware('permission:ver-carro')->only('index');
+
+        // Requiere permiso para añadir productos al carrito
+        $this->middleware('permission:editar-detalle')->only('store');
+
+        // Requiere permiso para actualizar las cantidades de los productos en el carrito
+        $this->middleware('permission:editar-detalle')->only('update');
+
+        // Requiere permiso para eliminar productos del carrito
+        $this->middleware('permission:eliminar-detalle')->only('destroy');
+    }
+
+    // Aquí van las demás funciones del controlador...
+
     /**
      * Display a listing of the resource.
      */
@@ -106,7 +125,8 @@ class DetalleController extends Controller
             // Actualizar el total del carro de compras
             $carro->total += $precioFinal * $request->cantidad;
             $carro->save();
-
+            // Crear notificación para el usuario
+            Notificacione::crearNotificacion($user->id, "Producto '{$producto->nombre}' añadido al carrito.");
             DB::commit(); // Confirmar la transacción
 
             return redirect()->back()->with('success', 'Producto añadido al carrito');
@@ -115,7 +135,6 @@ class DetalleController extends Controller
             return redirect()->back()->withErrors(['error' => 'Ocurrió un error al añadir el producto al carrito.']);
         }
     }
-
 
     /**
      * Display the specified resource.
@@ -174,40 +193,43 @@ class DetalleController extends Controller
         $carro->total += ($request->cantidad * $precioFinal) - ($cantidadAnterior * $precioFinal);
         $carro->save();
 
+        // Crear notificación para el usuario
+        Notificacione::crearNotificacion(auth()->id(), "La cantidad del producto '{$detalle->producto->nombre}' se ha actualizado.");
+
         return redirect()->route('detalle_compras.index')->with('success', 'Cantidad actualizada exitosamente.');
     }
-
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($detalle_compra)
-{
-    // Encuentra el detalle de compra
-    $detalle = Detalle_compra::findOrFail($detalle_compra);
+    {
+        // Encuentra el detalle de compra
+        $detalle = Detalle_compra::findOrFail($detalle_compra);
 
-    // Obtiene el carrito asociado
-    $carro = $detalle->carro_compra;
+        // Obtiene el carrito asociado
+        $carro = $detalle->carro_compra;
 
-    // Calcular el precio final considerando promociones
-    $promocion = Promocione::where('producto_id', $detalle->producto->id)
-        ->where('fecha_inicio', '<=', now())
-        ->where('fecha_fin', '>=', now())
-        ->first();
+        // Calcular el precio final considerando promociones
+        $promocion = Promocione::where('producto_id', $detalle->producto->id)
+            ->where('fecha_inicio', '<=', now())
+            ->where('fecha_fin', '>=', now())
+            ->first();
 
-    $precioFinal = $promocion
-        ? $detalle->producto->precio_venta - ($detalle->producto->precio_venta * $promocion->descuento / 100)
-        : $detalle->producto->precio_venta;
+        $precioFinal = $promocion
+            ? $detalle->producto->precio_venta - ($detalle->producto->precio_venta * $promocion->descuento / 100)
+            : $detalle->producto->precio_venta;
 
-    // Actualiza el total del carro
-    $carro->total -= ($detalle->cantidad * $precioFinal);
-    $carro->save();
+        // Actualiza el total del carro
+        $carro->total -= ($detalle->cantidad * $precioFinal);
+        $carro->save();
 
-    // Elimina el detalle de compra
-    $detalle->delete();
+        // Elimina el detalle de compra
+        $detalle->delete();
 
-    return redirect()->route('detalle_compras.index')->with('success', 'Producto eliminado del carrito exitosamente.');
-}
+        // Crear notificación para el usuario
+        Notificacione::crearNotificacion(auth()->id(), "El producto '{$detalle->producto->nombre}' ha sido eliminado del carrito.");
 
+        return redirect()->route('detalle_compras.index')->with('success', 'Producto eliminado del carrito exitosamente.');
+    }
 }

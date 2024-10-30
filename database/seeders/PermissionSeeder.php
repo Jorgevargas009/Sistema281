@@ -15,16 +15,44 @@ class PermissionSeeder extends Seeder
     {
         $permisos=[
             //producto
-            'ver-producto',
+           /* 'ver-producto',
+            'ver-miproducto',
+            'ver-productocomunidad',
             'crear-producto',
             'editar-producto',
             'eliminar-producto',
 
             //venta
-            'ver-venta',
-            'crear-venta',
-            'editar-venta',
-            'eliminar-venta',
+            'ver-carro',
+            'editar-detalle',
+            'eliminar-detalle',
+
+            //Pagos
+            'ver-pago',
+            'aprobar-pago',
+            'rechazar-pago',
+
+            //pedido
+            'ver-pedido',
+            'ver-pedidocomunidad',
+            'ver-mipedido',
+            'editar-mipedido',
+            'aceptar-pedido',
+            //roles
+            'ver-rol',
+            'crear-rol',
+            'editar-rol',
+            'eliminar-rol',
+            //usuarios
+            'ver-user',
+            'editar-user',
+            'eliminar-user',
+            //direccion
+            'ver-direccion',
+            'crear-direccion',
+            'asociar-direccion',*/
+            'crear-pago'
+
         ];
         foreach ($permisos as $permiso) 
         {

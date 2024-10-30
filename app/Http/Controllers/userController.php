@@ -15,6 +15,14 @@ use Spatie\Permission\Models\Role;
 
 class userController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:ver-user', ['only' => ['index']]);
+        $this->middleware('permission:crear-user', ['only' => ['create', 'store', 'register', 'storelogin']]);
+        $this->middleware('permission:editar-user', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:eliminar-user', ['only' => ['destroy']]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -52,10 +60,8 @@ class userController extends Controller
             $fieldhash = Hash::make($request->password);
             $request->merge(['password' => $fieldhash]);
             // Priorizar la comunidad seleccionada
-            if ($request->comunidade!=null) {
+            if ($request->comunidade != null) {
                 $comunidad_id = Comunidade::find($request->comunidade);
-                
-
             } elseif ($request->nueva_comunidad) {
                 $comunidad_id = Comunidade::create([
                     'nombre' => $request->nueva_comunidad,

@@ -4,36 +4,43 @@ namespace App\Http\Controllers;
 
 use App\Models\Carro_compra;
 use App\Models\Direccione;
+use App\Models\Notificacione;
 use App\Models\Pedido;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class PedidoController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:ver-mipedido')->only('index', 'show');
+        $this->middleware('permission:ver-pedidocomunidad')->only('comunidad', 'aceptar', 'my', 'delivery');
+        $this->middleware('permission:ver-pedido')->only('all');
+        $this->middleware('permission:aceptar-pedido')->only('aceptar', 'delivery');
+        $this->middleware('permission:editar-mipedido')->only('edit', 'update');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        // Obtienes el carro de compra del usuario autenticado
         $carroCompra = Carro_compra::where('user_id', Auth::id())->latest()->first();
 
-        // Verifica si el carro de compra existe
         if (!$carroCompra) {
             return redirect()->back()->with('error', 'No tienes un carro de compra activo.');
         }
 
-        // Obtienes solo los pedidos asociados al carro de compra
         $pedido = Pedido::where('carro_compra_id', $carroCompra->id)->get();
-        $direcciones = Direccione::where('user_id', auth()->id())->get(); // Direcciones del usuario autenticado
+        $direcciones = Direccione::where('user_id', auth()->id())->get();
 
-        // Verifica si hay pedidos activos
+        $productos = $carroCompra->detalle_compra;
         if ($pedido->isEmpty()) {
             return redirect()->back()->with('error', 'No tienes un pedido activo.');
         }
 
-        // Retornas la vista junto con los pedidos filtrados
-        return view('Pedido.index', compact('pedido', 'direcciones'));
+        return view('Pedido.index', compact('pedido', 'direcciones','productos'));
     }
 
     /**
@@ -41,19 +48,15 @@ class PedidoController extends Controller
      */
     public function all()
     {
-        // Obtiene todos los pedidos junto con las relaciones necesarias
         $pedidos = Pedido::with(['carro_compra.detalle_compra.producto', 'user'])->get();
 
         return view('Pedido.all', compact('pedidos'));
     }
 
-
     public function aceptar(Request $request, $id)
     {
-        // Acepta un pedido cambiando el estado a 'en camino' y estableciendo la fecha de entrega
         $pedido = Pedido::findOrFail($id);
 
-        // Verificar que el usuario no tenga otros pedidos 'en camino'
         $otroPedido = Pedido::where('user_id', Auth::id())
             ->where('estado_entrega', 'en camino')
             ->first();
@@ -62,88 +65,96 @@ class PedidoController extends Controller
             return redirect()->back()->withErrors(['error' => 'Ya tienes un pedido en camino.']);
         }
 
-        // Actualiza el estado, la fecha de entrega y asigna el usuario actual
         $pedido->estado_entrega = 'en camino';
-        $pedido->fecha_entrega = $request->input('fecha_entrega'); // Asegúrate de que este campo existe en tu modelo
-        $pedido->user_id = Auth::id(); // Asignar el ID del usuario actual al pedido
+        $pedido->fecha_entrega = $request->input('fecha_entrega');
+        $pedido->user_id = Auth::id();
         $pedido->save();
 
+        // Enviar notificación de éxito
+        Notificacione::crearNotificacion($pedido->carroCompra->user_id, "Pedido aceptado y en camino.");
+        
         return redirect()->route('pedidos.all')->with('success', 'Pedido aceptado y en camino.');
     }
 
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-
         $pedido = Pedido::with('carro_compra.detalle_compra', 'direccion', 'repartidor')->find($id);
-        $direcciones = Direccione::where('user_id', auth()->id())->get(); // Direcciones del usuario autenticado
+        $direcciones = Direccione::where('user_id', auth()->id())->get();
+
         return view('pedidos.show', compact('pedido', 'direcciones'));
     }
-    
+
     public function comunidad()
     {
-        // Obtén los pedidos de la comunidad del usuario
         $user = Auth::user();
-        $pedidos = Pedido::whereHas('user', function ($query) use ($user) {
-            $query->where('comunidad_id', $user->comunidad_id);
-        })->get();
+        $comunidad_id = $user->comunidad_id;
 
-        // Asegúrate de devolver la vista correcta
+        $pedidos = Pedido::whereHas('carro_compra.user', function ($query) use ($comunidad_id) {
+            $query->where('comunidad_id', $comunidad_id);
+        })
+            ->with(['carro_compra.detalle_compra.producto', 'carro_compra.user'])
+            ->get();
+
         return view('Pedido.comunidad', compact('pedidos'));
     }
 
-
-    // En tu controlador
-    public function confirmarRecepcion(Request $request, $id)
+    public function my()
     {
-        $pedido = Pedido::findOrFail($id); // Asegúrate de obtener el pedido existente
+        $user = Auth::user();
+        $pedidos = Pedido::where('user_id', $user->id)
+            ->with(['carro_compra.detalle_compra.producto', 'user'])
+            ->get();
 
-        // Cambia el estado de entrega
-        $pedido->estado_entrega = 'entregado';
-
-        // Establece la fecha de entrega
-        $pedido->fecha_entrega = now();
-
-        // Guarda los cambios
-        $pedido->save();
-        return redirect()->route('productos.comunidad')->with('success', 'Pedido');
+        return view('Pedido.my', compact('pedidos'));
     }
 
+    public function delivery()
+    {
+        $pedido = Pedido::with(['carro_compra.detalle_compra.producto', 'direccion'])
+            ->where('user_id', auth()->id())
+            ->where('estado_entrega', 'en camino')
+            ->latest()
+            ->first();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+        if (!$pedido) {
+            return redirect()->back()->with('error', 'No tienes un pedido asignado.');
+        }
+
+        $direccionLat = $pedido->direccion->latitud;
+        $direccionLng = $pedido->direccion->longitud;
+
+        return view('Pedido.delivery', [
+            'carro' => $pedido->carro_compra,
+            'direccion' => $pedido->direccion,
+            'direccionLat' => $direccionLat,
+            'direccionLng' => $direccionLng,
+        ]);
+    }
+    public function confirmarRecepcion(Request $request, $id)
+    {
+        $pedido = Pedido::findOrFail($id);
+
+        $pedido->estado_entrega = 'entregado';
+        $pedido->fecha_entrega = now();
+        $pedido->save();
+        $productos = $pedido->carro_compra->detalle_compra;
+
+        // Enviar notificación de éxito
+        Notificacione::crearNotificacion($pedido->user_id, "Pedido recibido exitosamente.");
+
+        return redirect()->route('productos.comunidad', compact('pedido', 'productos'))->with('success', 'Pedido recibido exitosamente.');
+    }
+
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         //

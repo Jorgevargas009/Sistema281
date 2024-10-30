@@ -31,9 +31,41 @@ class UserSeeder extends Seeder
         $rol->syncPermissions($permisos);
         $user->assignRole('administrador');
 */
-
+       /* 
+       
+        $rol = Role::create(['name'=>'administrador']);
         $rol = Role::create(['name' => 'artesano']);
         $rol = Role::create(['name' => 'cliente']);
         $rol = Role::create(['name' => 'repartidor']);
+        */
+
+        // Asignar permisos específicos a cada rol
+      /*  $roles = [
+            'artesano' => [
+                'ver-miproducto', 'crear-producto', 'editar-producto', 'eliminar-producto',
+            ],
+            'cliente' => [
+                'ver-productocomunidad', 'ver-mipedido', 'ver-carro', 'editar-carro', 'editar-mipedido', 'crear-direccion','asociar-direccion'
+            ],
+            'repartidor' => [
+                'ver-pedidocomunidad', 'aceptar-pedido'
+            ]
+        ];
+        */
+        // Asignar todos los permisos al administrador
+        $adminRol = Role::where('name', 'administrador')->first();
+        if ($adminRol) {
+            $allPermissions = Permission::all(); // Obtener todos los permisos
+            $adminRol->syncPermissions($allPermissions); // Asignar todos los permisos al administrador
+        }
+        
+        // Asignar permisos específicos a los demás roles
+     /*   foreach ($roles as $rolName => $permisosRol) {
+            $rol = Role::where('name', $rolName)->first(); // Buscar el rol
+            if ($rol) {
+                $permisos = Permission::whereIn('name', $permisosRol)->get(); // Buscar los permisos para ese rol
+                $rol->syncPermissions($permisos); // Asignar los permisos al rol
+            }
+        }*/
     }
 }

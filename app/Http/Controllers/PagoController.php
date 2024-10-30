@@ -6,20 +6,25 @@ use App\Models\Carro_compra;
 use App\Models\Pago;
 use App\Models\Pedido;
 use App\Models\Producto;
+use App\Models\Notificacione; // Asegúrate de importar el modelo de Notificación
 use Illuminate\Http\Request;
 
 class PagoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->middleware('permission:ver-pago')->only('index', 'show');
+        $this->middleware('permission:aprobar-pago')->only('aprobarPago');
+        $this->middleware('permission:rechazar-pago')->only('rechazarPago');
+        $this->middleware('permission:crear-pago')->only('confirmarPago', 'store');
+    }
+
     public function index()
     {
-        // Obtener todos los pagos de la base de datos
-        $pagos = Pago::all(); // Asegúrate de tener el modelo Pago importado
-
+        $pagos = Pago::all();
         return view('Pago.index', compact('pagos'));
     }
+
     public function aprobarPago($id)
     {
         $pago = Pago::findOrFail($id);
@@ -29,26 +34,25 @@ class PagoController extends Controller
         $pago->save();
 
         // Crear un nuevo pedido usando los datos del carro de compra
-        $carroCompra = $pago->carroCompra; // Obtén el carro de compra asociado
+        $carroCompra = $pago->carroCompra;
 
         $pedido = Pedido::create([
             'carro_compra_id' => $carroCompra->id,
             'direccione_id' => $carroCompra->direccione_id,
-            'fecha_pedido' => now(), // Fecha actual
+            'fecha_pedido' => now(),
             'total' => $carroCompra->total,
-            'estado_entrega' => 'pendiente', // Estado inicial
+            'estado_entrega' => 'pendiente',
         ]);
 
         // Actualizar el stock de cada producto en detalle_compras
         foreach ($carroCompra->detalle_compra as $detalle) {
             $producto = Producto::findOrFail($detalle->producto_id);
-
-            // Resta la cantidad del stock
             $producto->stock -= $detalle->cantidad;
-
-            // Guarda el producto actualizado
             $producto->save();
         }
+
+        // Crear notificación al usuario sobre la aprobación del pago
+        Notificacione::crearNotificacion($carroCompra->user_id, "Tu pago de {$pago->codigo} ha sido aprobado y se ha creado un nuevo pedido.");
 
         return redirect()->route('detalle_compras.index')->with('success', 'Pago aprobado y pedido creado.');
     }
@@ -58,21 +62,21 @@ class PagoController extends Controller
         $pago = Pago::findOrFail($id);
         $pago->delete();
 
+        // Crear notificación al usuario sobre el rechazo del pago
+        Notificacione::crearNotificacion($pago->carroCompra->user_id, "Tu pago de {$pago->codigo} ha sido rechazado y eliminado.");
+
         return redirect()->route('pagos.index')->with('success', 'Pago rechazado y eliminado correctamente.');
     }
 
-
     public function confirmarPago(Request $request)
     {
-        // Validar la solicitud
         $request->validate([
             'carro_compra_id' => 'required|exists:carro_compras,id',
             'forma_pago' => 'required|in:tarjeta,paypal,transferencia,qr',
             'codigo' => 'required|numeric',
         ]);
 
-        // Obtener el carro de compra
-        $carroCompra = Carro_Compra::find($request->carro_compra_id);
+        $carroCompra = Carro_compra::find($request->carro_compra_id);
 
         if (!$carroCompra) {
             return back()->withErrors(['error' => 'Carro de compra no encontrado']);
@@ -83,10 +87,13 @@ class PagoController extends Controller
             'carro_compra_id' => $request->carro_compra_id,
             'forma_pago' => $request->forma_pago,
             'codigo' => $request->codigo,
-            'estado' => 'pendiente', // Inicialmente el estado es 'pendiente'
+            'estado' => 'pendiente',
         ]);
 
-        return redirect()->route('pagos.show', $pago->id)->with('success', 'Pago registrado exitosamente, pendiente de confirmación');
+        // Crear notificación sobre el nuevo pago creado
+        Notificacione::crearNotificacion($carroCompra->user_id, "Se ha registrado un nuevo pago de {$pago->codigo}, pendiente de confirmación.");
+
+        return redirect()->route('pagos.show', $pago->id)->with('success', 'Pago registrado exitosamente, pendiente de confirmación.');
     }
 
     public function show($id)
@@ -97,33 +104,26 @@ class PagoController extends Controller
 
     public function confirmar($id)
     {
-        // Obtener el pago
         $pago = Pago::findOrFail($id);
 
-        // Verificar que el pago esté en estado 'pendiente'
         if ($pago->estado === 'pendiente') {
             $pago->estado = 'aceptado';
             $pago->save();
 
-            // Aquí puedes implementar la lógica adicional para procesar el pedido
-            // Una vez que el pago esté confirmado, el carro de compras se convierte en un pedido
+            // Crear notificación al usuario sobre la confirmación del pago
+            Notificacione::crearNotificacion($pago->carroCompra->user_id, "Tu pago de {$pago->codigo} ha sido confirmado exitosamente.");
 
-            return redirect()->route('pagos.show', $pago->id)->with('success', 'Pago confirmado exitosamente');
+            return redirect()->route('pagos.show', $pago->id)->with('success', 'Pago confirmado exitosamente.');
         }
 
-        return back()->withErrors(['error' => 'El pago ya fue confirmado o no está pendiente']);
+        return back()->withErrors(['error' => 'El pago ya fue confirmado o no está pendiente.']);
     }
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -134,12 +134,10 @@ class PagoController extends Controller
 
         $codigo = null;
 
-        // Solo para tarjeta se guarda el código de la tarjeta
         if ($request->forma_pago == 'tarjeta') {
-            $codigo = $request->numero_tarjeta; // O guarda de forma más segura si se requiere
+            $codigo = $request->numero_tarjeta;
         }
 
-        // Verificar si ya existe un pago para el carro de compra actual
         $existePago = Pago::where('carro_compra_id', $request->carro_compra_id)->exists();
 
         if ($existePago) {
@@ -147,35 +145,29 @@ class PagoController extends Controller
         }
 
         // Crear el pago
-        Pago::create([
+        $pago = Pago::create([
             'carro_compra_id' => $request->carro_compra_id,
             'forma_pago' => $request->forma_pago,
             'codigo' => $codigo,
-            'estado' => 'pendiente', // Por defecto pendiente
+            'estado' => 'pendiente',
         ]);
+
+        // Crear notificación sobre el nuevo pago creado
+        Notificacione::crearNotificacion($pago->carroCompra->user_id, "Se ha registrado un nuevo pago de {$pago->codigo}, pendiente de confirmación.");
 
         return redirect()->route('detalle_compras.index')->with('success', 'Procesando el pago.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         //

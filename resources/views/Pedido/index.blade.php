@@ -272,6 +272,67 @@
             </div>
         </div>
     </div>
+    <!-- Modal de Reseñas -->
+    <div class="modal fade" id="modalResenas" tabindex="-1" aria-labelledby="modalResenasLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalResenasLabel">Dejar Reseñas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-resenas" method="POST" action="{{ route('reseñas.guardar') }}">
+                        @csrf
+                        @foreach ($productos as $producto)
+                        <div class="mb-3">
+                            <label for="calificacion-{{ $producto->producto_id }}" class="form-label">Calificación para {{ $producto->producto->nombre }} (1-5)</label>
+                            <input type="hidden" name="producto_id[]" value="{{ $producto->producto_id }}">
+                            <select id="calificacion-{{ $producto->producto_id }}" name="calificacion[]" class="form-select" required>
+                                <option value="">Seleccionar calificación</option>
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                    @endfor
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comentario-{{ $producto->producto_id }}" class="form-label">Comentario para {{ $producto->producto->nombre }}</label>
+                            <textarea id="comentario-{{ $producto->producto_id }}" name="comentario[]" class="form-control" rows="3"></textarea>
+                        </div>
+                        @endforeach
+                        <button type="submit" class="btn btn-primary">Enviar Reseñas</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Muestra el modal después de confirmar el pedido
+        function mostrarModalResenas() {
+            $('#modalResenas').modal('show');
+        }
+
+        $(document).ready(function() {
+            $('#form-resenas').on('submit', function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        alert(response.message);
+                        $('#form-resenas')[0].reset();
+                        $('#modalResenas').modal('hide');
+                    },
+                    error: function(xhr) {
+                        const errors = xhr.responseJSON.errors;
+                        alert('Error: ' + Object.values(errors).flat().join(', '));
+                    }
+                });
+            });
+        });
+    </script>
 
     <script>
         $(document).ready(function() {

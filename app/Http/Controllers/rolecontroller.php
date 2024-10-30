@@ -10,6 +10,14 @@ use Spatie\Permission\Models\Role;
 
 class rolecontroller extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:ver-rol')->only('index', 'show');
+        $this->middleware('permission:editar-rol')->only('edit', 'update');
+        $this->middleware('permission:eliminar-rol')->only('destroy');
+        $this->middleware('permission:crear-rol')->only('create', 'store');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -37,18 +45,24 @@ class rolecontroller extends Controller
             'name' => 'required|unique:roles,name',
             'permission' => 'required'
         ]);
-        
         try {
             DB::beginTransaction();
             //Crear rol
             $rol = Role::create(['name' => $request->name]);
+            $permissions = array_map('intval', $request->permission);
+            $existingPermissions = Permission::whereIn('id', $permissions)->pluck('id')->toArray();
 
-            //Asignar permisos
-            $rol->syncPermissions($request->permission);
+            if (count($existingPermissions) !== count($permissions)) {
+                // Manejo de error: algunos permisos no existen
+                return redirect()->route('roles.index')->withErrors('Algunos permisos no existen.');
+            }
+
+            $rol->syncPermissions($existingPermissions);
 
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
+            return redirect()->route('roles.index')->with('error', 'Rol no registrado');
         }
 
 
@@ -82,27 +96,37 @@ class rolecontroller extends Controller
             'name' => 'required|unique:roles,name,' . $role->id,
             'permission' => 'required'
         ]);
-
+    
         try {
             DB::beginTransaction();
-
-            //Actualizar rol
+    
+            // Actualizar rol
             Role::where('id', $role->id)
                 ->update([
                     'name' => $request->name
                 ]);
-
-            //Actualizar permisos
-            $role->syncPermissions($request->permission);
-
+    
+            // Obtener y validar permisos
+            $permissions = array_map('intval', $request->permission);
+            $existingPermissions = Permission::whereIn('id', $permissions)->pluck('id')->toArray();
+    
+            if (count($existingPermissions) !== count($permissions)) {
+                // Manejo de error: algunos permisos no existen
+                return redirect()->route('roles.index')->withErrors('Algunos permisos no existen.');
+            }
+    
+            // Actualizar permisos
+            $role->syncPermissions($existingPermissions);
+    
             DB::commit();
         } catch (Exception $e) {
-            dd($e);
             DB::rollBack();
+            return redirect()->route('roles.index')->with('error', 'Rol no editado: ' . $e->getMessage());
         }
-
-        return redirect()->route('roles.index')->with('success', 'rol editado');
+    
+        return redirect()->route('roles.index')->with('success', 'Rol editado');
     }
+    
 
     /**
      * Remove the specified resource from storage.

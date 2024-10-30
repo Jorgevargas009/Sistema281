@@ -8,18 +8,29 @@ use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
 
 class ProductoController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:ver-productocomunidad')->only('ProductoComunidad');
+        $this->middleware('permission:crear-producto')->only('create', 'store');
+        $this->middleware('permission:editar-producto')->only('edit', 'update');
+        $this->middleware('permission:eliminar-producto')->only('destroy');
+        $this->middleware('permission:ver-miproducto')->only('index', 'ventas');
+        $this->middleware('permission:ver-producto')->only('allProducts');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        /*$productos=Producto::with(['id artesano'])->latest()->get();*/
         $productos = Producto::where('user_id', auth()->id())->get();
         return view('producto.index', compact('productos'));
     }
+
     public function allProducts()
     {
         // Obtener todos los productos
@@ -28,17 +39,37 @@ class ProductoController extends Controller
         return view('producto.all', compact('productos'));
     }
 
+    public function ventas()
+    {
+        $productos = DB::table('detalle_compras')
+            ->join('productos', 'detalle_compras.producto_id', '=', 'productos.id')
+            ->where('productos.user_id', auth()->id())
+            ->whereExists(function ($query) {
+                $query->from('pedidos')
+                    ->whereColumn('pedidos.carro_compra_id', 'detalle_compras.carro_compra_id');
+            })
+            ->select(
+                'detalle_compras.producto_id',
+                'productos.id as producto_id',
+                'productos.nombre',
+                'productos.descripcion',
+                'productos.precio',
+                'productos.precio_venta',
+                DB::raw('SUM(detalle_compras.cantidad) as total_cantidad')
+            )
+            ->groupBy('detalle_compras.producto_id', 'productos.id', 'productos.nombre', 'productos.descripcion', 'productos.precio', 'productos.precio_venta')
+            ->get();
+
+        return view('producto.ventas', compact('productos'));
+    }
+
     public function ProductoComunidad()
     {
-        // Obtener la comunidad del usuario autenticado
         $userComunidad = auth()->user()->comunidad_id;
-    
-        // Filtrar productos por la comunidad del usuario
+
         $productos = Producto::whereHas('user', function ($query) use ($userComunidad) {
             $query->where('comunidad_id', $userComunidad);
         })->get();
-    
-        // Retornar la vista con los productos filtrados
 
         return view('producto.comunidad', compact('productos'));
     }
@@ -76,6 +107,10 @@ class ProductoController extends Controller
 
             $producto->save();
             DB::commit();
+
+            // Enviar notificación de éxito
+            Notification::success('Producto registrado exitosamente.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', $e->getMessage());
@@ -127,6 +162,10 @@ class ProductoController extends Controller
 
             $producto->save();
             DB::commit();
+
+            // Enviar notificación de éxito
+            Notification::success('Producto actualizado exitosamente.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', $e->getMessage());
@@ -140,8 +179,10 @@ class ProductoController extends Controller
      */
     public function destroy(Producto $producto)
     {
-        $message = '';
         $producto->delete();
+
+        // Enviar notificación de éxito
+        Notification::success('Producto eliminado exitosamente.');
 
         return redirect()->route('productos.index')->with('success', 'Producto Eliminado');
     }

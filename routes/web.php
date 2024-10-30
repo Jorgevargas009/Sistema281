@@ -14,8 +14,10 @@ use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\DetalleController;
 use App\Http\Controllers\DireccioneController;
 use App\Http\Controllers\inicioController;
+use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\ResenaController;
 use App\Models\Detalle_compra;
 
 /*
@@ -46,8 +48,13 @@ Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'
 // Ruta para mostrar el formulario de verificación
 Route::get('/verify', [loginController::class, 'showVerificationForm'])->name('verify');
 
+Route::get('/notificaciones/{id}/marcar-como-leida', [NotificacionController::class, 'marcarComoLeida'])->name('notificaciones.marcarComoLeida');
 // Ruta correcta para la comunidad
 Route::get('/pedidos/comunidad', [PedidoController::class, 'comunidad'])->name('pedidos.comunidad');
+Route::get('/pedidos/my', [PedidoController::class, 'my'])->name('pedidos.my');
+Route::get('/pedidos/delivery', [PedidoController::class, 'delivery'])->name('pedidos.delivery');
+Route::post('/reseñas/guardar', [ResenaController::class, 'guardar'])->name('reseñas.guardar');
+Route::post('/reseñas/store', [ResenaController::class, 'store'])->name('reseñas.store');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/pedidos/all', [PedidoController::class, 'all'])->name('pedidos.all');
@@ -74,6 +81,7 @@ Route::resources([
     'pagos' => PagoController::class,
     'pedidos' => PedidoController::class,
 ]);
+
 Route::post('/pedidos/recibido/{pedido}', [PedidoController::class, 'confirmarRecepcion'])->name('pedidos.recibido');
 // Ejemplo de ruta en web.php
 Route::get('/pedido/confirmar/{id}', [PedidoController::class, 'confirmarRecepcion'])->name('pedido.confirmar');
@@ -121,5 +129,6 @@ Route::get('/500', function () {
 });
 
 Route::get('/producto/all', [ProductoController::class, 'allProducts'])->name('productos.all');
+Route::get('/producto/ventas', [ProductoController::class, 'ventas'])->name('productos.ventas');
 
 Route::get('/producto/comunidad', [ProductoController::class, 'ProductoComunidad'])->name('productos.comunidad');

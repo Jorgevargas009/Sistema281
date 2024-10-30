@@ -4,10 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Direccione;
 use App\Models\Pedido;
+use App\Models\Notificacione; // Asegúrate de importar el modelo de notificaciones
 use Illuminate\Http\Request;
 
 class DireccioneController extends Controller
 {
+    public function __construct()
+    {
+        // Permiso para ver direcciones
+        $this->middleware('permission:ver-direccion')->only('index');
+
+        // Permiso para crear direcciones
+        $this->middleware('permission:crear-direccion')->only('create', 'guardar', 'store');
+
+        // Permiso para asociar dirección a un pedido
+        $this->middleware('permission:asociar-direccion')->only('asociarDireccion');
+
+        // Permiso para buscar repartidor
+        $this->middleware('permission:editar-direccion')->only('buscarRepartidor');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -35,7 +51,7 @@ class DireccioneController extends Controller
         ]);
 
         // Crear una nueva dirección asociada al usuario autenticado
-        Direccione::create([
+        $direccion = Direccione::create([
             'user_id' => auth()->id(),  // Asocia la dirección al usuario autenticado
             'direccion' => $validated['direccion'],
             'ciudad' => $validated['ciudad'],
@@ -43,9 +59,13 @@ class DireccioneController extends Controller
             'longitud' => $validated['longitud'],
         ]);
 
+        // Crear una notificación para el usuario
+        Notificacione::crearNotificacion(auth()->id(), "Se ha guardado una nueva dirección: {$direccion->direccion}");
+
         // Redirigir o responder con éxito
         return redirect()->back()->with('success', 'Dirección guardada correctamente');
     }
+
     public function asociarDireccion(Request $request, $pedidoId)
     {
         $pedido = Pedido::findOrFail($pedidoId);
@@ -68,11 +88,15 @@ class DireccioneController extends Controller
         $pedido->direccione_id = $request->direccion_id;
         $pedido->save();
     
+        // Crear una notificación para el usuario
+        Notificacione::crearNotificacion(auth()->id(), "La dirección ha sido asociada al pedido ID: {$pedido->id}");
+    
         // Mensaje de éxito
         session()->flash('direccion_asociada', 'La dirección ha sido asociada.');
         
         return redirect()->back()->with('success', 'Dirección asociada correctamente.');
     }
+
     public function buscarRepartidor(Request $request)
     {
         // Lógica para buscar repartidor
@@ -83,6 +107,7 @@ class DireccioneController extends Controller
 
         return redirect()->back(); // Regresa a la vista anterior
     }
+
     /**
      * Store a newly created resource in storage.
      */

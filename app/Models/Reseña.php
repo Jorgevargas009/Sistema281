@@ -11,9 +11,9 @@ class Reseña extends Model
 
     protected $fillable = ['cliente_id', 'producto_id', 'calificacion', 'comentario', 'fecha_reseña'];
 
-    public function cliente()
+    public function user()
     {
-        return $this->belongsTo(Cliente::class);
+        return $this->belongsTo(User::class);
     }
 
     public function producto()
