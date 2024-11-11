@@ -18,7 +18,9 @@ use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ResenaController;
-use App\Models\Detalle_compra;
+use App\Models\Detalle_compra;use App\Http\Controllers\DashboardController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +43,7 @@ Route::post('/email/resend', [VerificationController::class, 'resend'])
     ->name('verification.resend');
 Route::get('email/verify', [App\Http\Controllers\Auth\VerificationController::class, 'show'])->name('verification.notice');
 
+Route::get('/panel/index', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
     ->middleware(['auth', 'signed'])
     ->name('verification.verify');

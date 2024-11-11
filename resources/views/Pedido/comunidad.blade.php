@@ -94,8 +94,10 @@
                                         @csrf
                                         <div class="mb-3">
                                             <label for="fecha_entrega" class="form-label">Selecciona la Fecha y Hora de Entrega:</label>
-                                            <input type="datetime-local" class="form-control" id="fecha_entrega" name="fecha_entrega" required>
+                                            <input type="datetime-local" class="form-control" id="fecha_entrega" name="fecha_entrega" required
+                                                value="<?php echo date('Y-m-d\TH:i', strtotime('+1 day')); ?>">
                                         </div>
+
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                                             <button type="submit" class="btn btn-primary">Aceptar Pedido</button>
@@ -163,7 +165,7 @@
                                             {{ $pedido->fecha_entrega ? \Carbon\Carbon::parse($pedido->fecha_entrega)->format('d/m/Y H:i') : 'No asignada' }}
                                         </p>
                                     </div>
-                                    
+
                                     @if ($pedido->user != null)
                                     <div class="row mb-3">
                                         <p><strong>Repartidor:</strong> {{ $pedido->user->nombre. ' '. $pedido->user->apellido }}</p>

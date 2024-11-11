@@ -110,7 +110,7 @@
     <div class="text-end">
         <h4>Total: {{ $carro->total }}</h4>
     </div>
-    
+
 
     <div class="card mb-4">
         <div class="card-header">
@@ -135,12 +135,56 @@
 
     <!-- Mapa de Ubicación Actual -->
     <div id="map" style="height: 350px; margin-top: 20px;"></div>
+
+
+    <div class="text-end">
+        <button class="btn btn-success" id="abrirModal" data-pedido-id="{{ $pedido->id }}">
+            Pedido Entregado
+        </button>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div class="modal fade" id="confirmarModal" tabindex="-1" role="dialog" aria-labelledby="confirmarModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmarModalLabel">Confirmar Recepción</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas marcar este pedido como recibido? ¡No podrás revertir esta acción!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="confirmarBtn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
 @push('js')
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#abrirModal').on('click', function() {
+            var pedidoId = $(this).data('pedido-id'); // Extraer el ID del pedido
+            $('#confirmarModal').modal('show'); // Mostrar el modal
+
+            // Al hacer clic en el botón de confirmar
+            $('#confirmarBtn').off('click').on('click', function() {
+                window.location.href = '/pedido/confirmar/' + pedidoId;
+            });
+        });
+    });
+</script>
 <script>
     // Inicializar el mapa
     let map, userMarker, destinationMarker, routingControl;
@@ -149,7 +193,7 @@
     function initMap() {
         const direccionLat = "{{ $direccionLat }}";
         const direccionLng = "{{ $direccionLng }}";
-        
+
         map = L.map('map').setView([direccionLat, direccionLng], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
@@ -157,13 +201,13 @@
 
         // Añadir un marcador en la ubicación del pedido
         destinationMarker = L.marker([direccionLat, direccionLng], {
-            icon: L.icon({
-                iconUrl: "{{ asset('img/pedido.png') }}",
-                iconSize: [30, 30],
-                iconAnchor: [15, 30]
-            })
-        }).addTo(map)
-        .bindPopup('Entrega en: {{ $direccion->direccion }}').openPopup();
+                icon: L.icon({
+                    iconUrl: "{{ asset('img/pedido.png') }}",
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 30]
+                })
+            }).addTo(map)
+            .bindPopup('Entrega en: {{ $direccion->direccion }}').openPopup();
 
         // Obtener ubicación del usuario
         if (navigator.geolocation) {
@@ -183,13 +227,13 @@
                 } else {
                     // Si no existe, lo creamos
                     userMarker = L.marker([lat, lng], {
-                        icon: L.icon({
-                            iconUrl: "{{ asset('img/repartidor.png') }}",
-                            iconSize: [30, 30],
-                            iconAnchor: [15, 30]
-                        })
-                    }).addTo(map)
-                    .bindPopup('Tu ubicación').openPopup();
+                            icon: L.icon({
+                                iconUrl: "{{ asset('img/repartidor.png') }}",
+                                iconSize: [30, 30],
+                                iconAnchor: [15, 30]
+                            })
+                        }).addTo(map)
+                        .bindPopup('Tu ubicación').openPopup();
                 }
 
                 // Traza la ruta desde la ubicación del usuario hasta el destino
@@ -205,7 +249,9 @@
                             L.latLng(direccionLat, direccionLng)
                         ],
                         routeWhileDragging: true,
-                        createMarker: function() { return null; }
+                        createMarker: function() {
+                            return null;
+                        }
                     }).addTo(map);
                 }
             }, function(error) {

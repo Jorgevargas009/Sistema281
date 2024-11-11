@@ -71,7 +71,7 @@ class PedidoController extends Controller
         $pedido->save();
 
         // Enviar notificación de éxito
-        Notificacione::crearNotificacion($pedido->carroCompra->user_id, "Pedido aceptado y en camino.");
+        Notificacione::crearNotificacion($pedido->carro_compra->user_id, "Pedido aceptado y en camino.");
         
         return redirect()->route('pedidos.all')->with('success', 'Pedido aceptado y en camino.');
     }
@@ -122,8 +122,8 @@ class PedidoController extends Controller
 
         $direccionLat = $pedido->direccion->latitud;
         $direccionLng = $pedido->direccion->longitud;
-
         return view('Pedido.delivery', [
+            'pedido'=>$pedido,
             'carro' => $pedido->carro_compra,
             'direccion' => $pedido->direccion,
             'direccionLat' => $direccionLat,
@@ -142,7 +142,7 @@ class PedidoController extends Controller
         // Enviar notificación de éxito
         Notificacione::crearNotificacion($pedido->user_id, "Pedido recibido exitosamente.");
 
-        return redirect()->route('productos.comunidad', compact('pedido', 'productos'))->with('success', 'Pedido recibido exitosamente.');
+        return redirect()->route('pedidos.comunidad', compact('pedido', 'productos'))->with('success', 'Pedido recibido exitosamente.');
     }
 
     public function edit(string $id)

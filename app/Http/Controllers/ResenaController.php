@@ -10,22 +10,33 @@ class ResenaController extends Controller
     //
     public function guardar(Request $request)
     {
+        // Validar la solicitud para múltiples productos
         $request->validate([
-            'producto_id' => 'required|exists:productos,id',
-            'calificacion' => 'required|integer|between:1,5',
-            'comentario' => 'nullable|string',
+            'producto_id' => 'required|array',
+            'producto_id.*' => 'required|exists:productos,id',
+            'calificacion' => 'required|array',
+            'calificacion.*' => 'required|integer|between:1,5',
+            'comentario' => 'nullable|array',
+            'comentario.*' => 'nullable|string',
         ]);
 
-        Reseña::create([
-            'user_id' => auth()->id(), // Asignar el ID del usuario autenticado
-            'producto_id' => $request->producto_id,
-            'calificacion' => $request->calificacion,
-            'comentario' => $request->comentario,
-            'fecha_reseña' => now(),
-        ]);
+        // Iterar sobre los productos para guardar cada reseña
+        foreach ($request->producto_id as $index => $productoId) {
+            $calificacion = $request->calificacion[$index];
+            $comentario = $request->comentario[$index] ?? null;
 
-        return response()->json(['message' => 'Reseña guardada con éxito.']);
+            Reseña::create([
+                'user_id' => auth()->id(), // ID del usuario autenticado
+                'producto_id' => $productoId,
+                'calificacion' => $calificacion,
+                'comentario' => $comentario,
+                'fecha_reseña' => now(),
+            ]);
+        }
+
+        return response()->json(['message' => 'Reseñas guardadas con éxito.']);
     }
+
     public function store(Request $request)
     {
         // Validar la solicitud

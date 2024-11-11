@@ -242,36 +242,15 @@
         </div>
     </div>
     <div class="text-end">
-        @if ($pedido->estado_entrega == 'en camino')
-        <button class="btn btn-success" id="abrirModal" data-pedido-id="{{ $pedido->id }}">
+        @if ($pedido->estado_entrega == 'entregado' && \Carbon\Carbon::parse($pedido->fecha_entrega)->diffInDays(now()) <= 1)
+            <button class="btn btn-success" id="abrirResenas" data-pedido-id="{{ $pedido->id }}">
             Pedido Recibido
-        </button>
-
-        @else
-        <span class="text-muted">El pedido no tiene repartidor.</span>
-        @endif
+            </button>
+            @else
+            <span class="text-muted">El pedido ya ha sido entregado o no está disponible para calificar.</span>
+            @endif
     </div>
 
-    <!-- Modal de Confirmación -->
-    <div class="modal fade" id="confirmarModal" tabindex="-1" role="dialog" aria-labelledby="confirmarModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmarModalLabel">Confirmar Recepción</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    ¿Estás seguro de que deseas marcar este pedido como recibido? ¡No podrás revertir esta acción!
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success" id="confirmarBtn">Confirmar</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Modal de Reseñas -->
     <div class="modal fade" id="modalResenas" tabindex="-1" aria-labelledby="modalResenasLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -285,14 +264,14 @@
                         @csrf
                         @foreach ($productos as $producto)
                         <div class="mb-3">
-                            <label for="calificacion-{{ $producto->producto_id }}" class="form-label">Calificación para {{ $producto->producto->nombre }} (1-5)</label>
+                            <label for="calificacion-{{ $producto->producto_id }}" class="form-label">Calificación para {{ $producto->producto->nombre }}</label>
                             <input type="hidden" name="producto_id[]" value="{{ $producto->producto_id }}">
-                            <select id="calificacion-{{ $producto->producto_id }}" name="calificacion[]" class="form-select" required>
-                                <option value="">Seleccionar calificación</option>
+                            <input type="hidden" id="calificacion-{{ $producto->producto_id }}" name="calificacion[]" value="">
+                            <div class="rating" id="rating-{{ $producto->producto_id }}">
                                 @for ($i = 1; $i <= 5; $i++)
-                                    <option value="{{ $i }}">{{ $i }}</option>
+                                    <span class="star" data-value="{{ $i }}">&#9733;</span>
                                     @endfor
-                            </select>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="comentario-{{ $producto->producto_id }}" class="form-label">Comentario para {{ $producto->producto->nombre }}</label>
@@ -307,12 +286,29 @@
     </div>
 
     <script>
-        // Muestra el modal después de confirmar el pedido
-        function mostrarModalResenas() {
-            $('#modalResenas').modal('show');
-        }
-
         $(document).ready(function() {
+            // Evento al hacer clic en "Pedido Recibido"
+            $('#abrirResenas').on('click', function() {
+                if (confirm("¿Estás seguro de que has recibido el pedido?")) {
+                    // Si el usuario confirma, muestra el modal de reseñas
+                    $('#modalResenas').modal('show');
+                }
+            });
+
+            // Establecer la calificación al hacer clic en las estrellas
+            $('.star').on('click', function() {
+                var calificacion = $(this).data('value');
+                var productoId = $(this).closest('.rating').attr('id').split('-')[1]; // Obtener el ID del producto
+
+                // Marcar todas las estrellas hasta la seleccionada
+                $(this).siblings().removeClass('selected');
+                $(this).prevAll().addBack().addClass('selected');
+
+                // Establecer el valor de calificación en el input oculto
+                $('#calificacion-' + productoId).val(calificacion);
+            });
+
+            // Enviar el formulario de reseñas por AJAX
             $('#form-resenas').on('submit', function(e) {
                 e.preventDefault();
 
@@ -334,21 +330,23 @@
         });
     </script>
 
-    <script>
-        $(document).ready(function() {
-            $('#abrirModal').on('click', function() {
-                var pedidoId = $(this).data('pedido-id'); // Extraer el ID del pedido
-                $('#confirmarModal').modal('show'); // Mostrar el modal
+    <style>
+        .rating {
+            display: flex;
+            justify-content: flex-start;
+            gap: 5px;
+        }
 
-                // Al hacer clic en el botón de confirmar
-                $('#confirmarBtn').off('click').on('click', function() {
-                    window.location.href = '/pedido/confirmar/' + pedidoId;
-                });
-            });
-        });
-    </script>
+        .star {
+            font-size: 30px;
+            color: gray;
+            cursor: pointer;
+        }
 
-
+        .star.selected {
+            color: gold;
+        }
+    </style>
 
 </div>
 
