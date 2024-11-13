@@ -40,7 +40,7 @@
                 <li><a class="dropdown-item" href="#!">Configuraciones</a></li>
                 <li><a class="dropdown-item" href="#!">Registro de actividad</a></li>
                 <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item" href="{{ route('logout') }}">Cerrar sesión</a></li>
+                <li><a class="dropdown-item" method="POST" href="{{ route('logout') }}">Cerrar sesión</a></li>
             </ul>
         </li>
     </ul>

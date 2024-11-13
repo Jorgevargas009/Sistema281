@@ -89,7 +89,7 @@ Route::post('/pedidos/recibido/{pedido}', [PedidoController::class, 'confirmarRe
 // Ejemplo de ruta en web.php
 Route::get('/pedido/confirmar/{id}', [PedidoController::class, 'confirmarRecepcion'])->name('pedido.confirmar');
 
-Route::get('/Pedido/index', [PedidoController::class, 'index'])->name('pedidos.index')->middleware('auth');
+Route::get('/Pedido/index', [PedidoController::class, 'index'])->name('pedidos.index');
 Route::post('/direcciones/guardar', [DireccioneController::class, 'guardar'])->name('direcciones.guardar');
 Route::post('/direcciones/asociar/{pedido}', [DireccioneController::class, 'asociarDireccion'])->name('direcciones.asociar');
 
@@ -105,7 +105,7 @@ Route::get('/register', [userController::class, 'register'])->name('register');
 
 Route::get('/login', [loginController::class, 'index'])->name('login');
 Route::post('/login', [loginController::class, 'login']);
-Route::get('/logout', [logoutController::class, 'logout'])->name('logout');
+Route::post('/logout', [logoutController::class, 'logout'])->name('logout');
 
 Route::get('/401', function () {
     return view('pages.401');
@@ -135,3 +135,4 @@ Route::get('/producto/all', [ProductoController::class, 'allProducts'])->name('p
 Route::get('/producto/ventas', [ProductoController::class, 'ventas'])->name('productos.ventas');
 
 Route::get('/producto/comunidad', [ProductoController::class, 'ProductoComunidad'])->name('productos.comunidad');
+
